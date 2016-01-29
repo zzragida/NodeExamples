@@ -1,0 +1,58 @@
+'use strict'
+
+var models = require('./models');
+
+/* ------------------------------------------------------------- */
+
+function User(userId) {
+  this.userId = userId;
+}
+
+/* ------------------------------------------------------------- */
+
+User.prototype.login = function(gameId, userId, platform, ip) {
+  throw new NotImplementedError();
+};
+
+User.prototype.logout = function(gameId, facebookId) {
+  throw new NotImplementedError();
+};
+
+/* ------------------------------------------------------------- */
+
+User.prototype.startGame = function () {
+  throw new NotImplementedError();
+};
+
+User.prototype.endGame = function () {
+  throw new NotImplementedError();
+};
+
+/* ------------------------------------------------------------- */
+
+User.prototype.fillInfo = function(info) {
+  throw new NotImplementedError();
+};
+
+User.prototype.fillProperties = function (properties) {
+  throw new NotImplementedError();
+};
+
+User.prototype.fillBadges = function (badges) {
+};
+
+/* ------------------------------------------------------------- */
+
+module.exports = User;
+
+module.exports.getUserId = function (gameId, facebookId) {
+  return new Promise(function (resolve, reject) {
+    models.makeUser(gameId, facebookId, 10, 10, 1).then(function (userId) {
+      resolve(userId);
+    }, function (err) {
+      reject(err);
+    });
+  });
+};
+
+/* ------------------------------------------------------------- */

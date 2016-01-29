@@ -1,0 +1,188 @@
+'use strict'
+
+var redis = require('redis');
+
+/* ------------------------------------------------------------- */
+
+function Redis(config) {
+  this.host = config.host;
+  this.port = config.port;
+  this.db = config.db;
+  this.pool = require('pool-redis')({
+    'host': this.host,
+    'port': this.port,
+    'maxConnections': 10
+  });
+}
+
+Redis.prototype.getClient = function (callback) {
+  this.pool.getClient(callback);
+};
+
+Redis.prototype.del = function (key) {
+  var self = this;
+  self.pool.getClient(function (client, done) {
+    client.multi()
+      .select(self.db)
+      .del(key)
+      .exec(function (err, replies) {
+        done();
+        if (err) logger.error(err);
+      });
+  });
+}
+
+Redis.prototype.expire = function (key, secs) {
+  var self = this;
+  self.pool.getClient(function (client, done) {
+    client.multi()
+      .select(self.db)
+      .expire(key, secs)
+      .exec(function (err, replies) {
+        done();
+        if (err) logger.error(err);
+      });
+  });
+}
+
+Redis.prototype.set = function (key, value) {
+  var self = this;
+  self.pool.getClient(function (client, done) {
+    client.multi()
+      .select(self.db)
+      .set(key, value)
+      .exec(function (err, replies) {
+        done();
+        if (err) logger.error(err);
+      });
+  });
+}
+
+Redis.prototype.get = function (key, callback) {
+  var self = this;
+  self.pool.getClient(function (client, done) {
+    client.multi()
+      .select(self.db)
+      .get(key)
+      .exec(function (err, replies) {
+        done();
+        if (err) logger.error(err);
+        callback(err, reply);
+      });
+  });
+}
+
+Redis.prototype.hkeys = function (hkey, callback) {
+  var self = this;
+  self.pool.getClient(function (client, done) {
+    client.multi()
+      .select(self.db)
+      .hkeys(hkey)
+      .exec(function (err, replies) {
+        done();
+        if (err) logger.err(err);
+        callback(err, replies[1]);
+      });
+  });
+}
+
+Redis.prototype.hset = function (hkey, field, value) {
+  var self = this;
+  self.pool.getClient(function (client, done) {
+    client.multi()
+      .select(self.db)
+      .hset(hkey, field, value)
+      .exec(function (err, replies) {
+        done();
+        if (err) logger.error(err);
+      });
+  });
+}
+
+Redis.prototype.hget = function (hkey, field, callback) {
+  var self = this;
+  self.pool.getClient(function (client, done) {
+    client.multi()
+      .select(self.db)
+      .hget(hkey, field)
+      .exec(function (err, replies) {
+        done();
+        if (err) logger.error(err);
+        callback(err, replies[1]);
+      });
+  });
+}
+
+Redis.prototype.hmset = function (hkey, fields) {
+  var self = this;
+  self.pool.getClient(function (client, done) {
+    client.multi()
+      .select(self.db)
+      .hmset(hkey, fields)
+      .exec(function (err, replies) {
+        done();
+        if (err) logger.error(err);
+      });
+  });
+}
+
+Redis.prototype.hgetall = function (hkey, callback) {
+  var self = this;
+  self.pool.getClient(function (client, done) {
+    client.multi()
+      .select(self.db)
+      .hgetall(hkey)
+      .exec(function (err, reply) {
+        done();
+        if (err) logger.error(err);
+        callback(err, reply);
+      });
+  });
+}
+
+Redis.prototype.incr = function (key) {
+  var self = this;
+  self.pool.getClient(function (client, done) {
+    client.multi()
+      .select(self.db)
+      .incr(key)
+      .exec(function (err, replies) {
+        done();
+        if (err) logger.error(err);
+      });
+  });
+}
+
+/* ------------------------------------------------------------- */
+
+function makeInstances(configs) {
+  var instances = [];
+  configs.forEach(function (config) {
+    instances.push(new Redis(config));
+  });
+  return instances;
+}
+
+// 프리젠스
+module.exports.PRESENCES = makeInstances(SETTINGS.REDIS_PRESENCES);
+
+// 모니터
+module.exports.MONITOR = new Redis(SETTINGS.REDIS_MONITOR);
+
+// 대기방
+module.exports.READY = new Redis(SETTINGS.REDIS_READY);
+
+// 친구
+module.exports.BUDDIES = makeInstances(SETTINGS.REDIS_BUDDIES);
+
+// 랭킹
+module.exports.RANKING = new Redis(SETTINGS.REDIS_RANKING);
+
+// 랭커 프로필
+module.exports.RANKER = makeInstances(SETTINGS.REDIS_RANK_PROFILES);
+
+// 추천
+module.exports.RECOMMEND = new Redis(SETTINGS.REDIS_RECOMMEND);
+
+// 매칭
+module.exports.MATCH = new Redis(SETTINGS.REDIS_MATCH);

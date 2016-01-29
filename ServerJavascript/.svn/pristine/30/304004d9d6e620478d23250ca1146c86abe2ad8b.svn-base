@@ -1,0 +1,265 @@
+test_gateway:
+  id: 102
+  host: 10.30.76.13
+  port: 6000
+
+  thread_pool_size: 10
+  client_timeout: 60 # seconds
+  online_timeout: 180 # seconds
+  update_interval: 60 # seconds
+
+  max_connection: 20000
+
+  max_heart: 5
+  heart_per_seconds: 60 # seconds
+
+  intercom:
+    host: 192.168.122.180
+    port: 6102
+
+  statistics: http://10.30.76.13:8100/monitor/update/kjs/gateway
+
+#  skip_version_check: true
+#  allow_multiple_request_to_presence: true
+#  shutdown_after_detach: 0
+
+#  starting_date: 2013-04-01
+
+
+
+test_room:
+  id: 103
+  host: 10.30.76.13
+  port: 6001
+  name: "m3-room-dev-01"
+
+  thread_pool_size: 10
+  ready_timeout: 120
+  pingpong_timeout: 60
+  restart_timeout: 3600
+  update_interval: 60
+
+  stage:
+    host: 10.30.76.13
+    port: 6101
+
+  statistics: http://10.30.76.13:8100/monitor/update/kjs/room
+
+
+ranking:
+  id: 104
+  host: localhost
+  port: 0
+
+
+
+network:
+  dump_packet: true
+  dump_traffic: true
+
+
+logging:
+  - output: console
+    level: debug
+
+  - output: file
+    level: debug
+    filename: /home/kjs/projects/ServerJavascript/service.log
+
+
+
+# 원격 로깅 서버의 위치
+control_center:
+  host: localhost
+  port: 3000
+
+
+redis_monitor:
+  host: localhost
+  port: 6379
+  db: 0
+
+
+
+redis_presences:
+  - host: localhost
+    port: 6379
+    db: 1
+
+  - host: localhost
+    port: 6379
+    db: 2
+
+
+redis_match:
+  host: localhost
+  port: 6379
+  db: 3
+
+
+redis_ranking:
+  host: localhost
+  port: 6379
+  db: 4
+
+
+redis_ready:
+  host: localhost
+  port: 6379
+  db: 5
+
+
+redis_recommend:
+  host: localhost
+  port: 6379
+  db: 6
+
+
+
+redis_profiles:
+  - host: localhost
+    port: 6379
+    db: 8
+
+  - host: localhost
+    port: 6379
+    db: 9
+
+
+redis_buddies:
+  - host: localhost
+    port: 6379
+    db: 10
+
+  - host: localhost
+    port: 6379
+    db: 11
+
+
+redis_rank_profiles:
+  - host: localhost
+    port: 6379
+    db: 12
+
+  - host: localhost
+    port: 6379
+    db: 13
+
+
+
+sqlrelays:
+  - host: localhost
+    port: 6003
+    user: sqlruser
+    pass: sqlrpass
+
+  - host: localhost
+    port: 6003
+    user: sqlruser
+    pass: sqlrpass
+
+  - host: localhost
+    port: 6003
+    user: sqlruser
+    pass: sqlrpass
+
+  - host: localhost
+    port: 6003
+    user: sqlruser
+    pass: sqlrpass
+
+
+database:
+  debug: true
+
+
+forbidden: 
+  name: ../etc/new_forbidden.txt
+  chat: ../etc/chat_forbidden.txt
+
+
+membership: 
+  url: 'http://10.30.76.13:7200/api'
+  app_id: 1
+  app_key: '9f0fe0c6989b7c924b4279ce3a5971b107e5c1fd'
+  app_secret: '282c67425e713b7fe2720a4424a06f2dbc52f8e19265979991c13ba100d07062'
+  only_membership: false
+
+
+abuse: false # 어뷰징데이터 검증
+
+
+
+# admin service
+## web/admin
+admin:
+  host: 0.0.0.0
+  port: 8000
+  debug: true
+
+  monitor:
+    url: http://10.30.76.13:8100/monitor/graph
+    hosts:
+      - kjs
+
+  log:
+    level: debug
+    filename: /home/kjs/projects/M3ARPG/Server-Taiwan/web/log/admin.log
+
+
+# gate service
+## web/gate
+gate:
+  host: 0.0.0.0
+  port: 8011
+  debug: true
+
+  log:
+    level: debug
+    filename: /home/kjs/projects/M3ARPG/Server-Taiwan/web/log/gate.log
+
+
+# room service
+## web/room
+room:
+  host: 0.0.0.0
+  port: 8010
+  debug: true
+
+  log: 
+    level: debug
+    filename: /home/kjs/projects/M3ARPG/Server-Taiwan/web/log/room.log
+
+
+# monitor service
+## web/monitor
+monitor:
+  host: 0.0.0.0
+  port: 8100
+  debug: true
+  interval: 60 # sec
+  rrd: /home/kjs/projects/M3ARPG/Server-Taiwan/rrd
+
+  log:
+    level: debug
+    filename: /home/kjs/projects/M3ARPG/Server-Taiwan/web/log/monitor.log
+
+
+# remote logger database
+mongodb:
+  host: localhost
+  port: 27017
+  db: log
+
+
+# async task manager with Celery
+celery:
+  broker_url: redis://localhost/0
+  backend_url: redis://localhost/0
+  result_backend: redis://localhost/0
+  task_serializer: json
+  accept_content: ['json']
+  timezone: Asia/Seoul
+  enable_utc: true
+  redis_max_connections: 20
+

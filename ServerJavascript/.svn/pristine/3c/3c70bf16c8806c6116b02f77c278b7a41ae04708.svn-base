@@ -1,0 +1,366 @@
+package m3.room;
+
+import "common.proto";
+
+enum MessageType 
+{
+  VERSION = 1;
+  ENTER = 2;
+  LEAVE = 3;
+  PLUG = 4;
+  DETACH = 5;
+
+  CHAT = 10;					// 대기방에서 채팅메시지 전달
+	EMOTICON = 11;			// 대기방에서 이모티콘 감정표현
+  TOUCH = 12; 				// 화면 터치정보 전송
+
+  NEW_PLAYER = 101;
+  LEAVE_PLAYER = 102;	
+  READY = 103; 						// 대기방에 대기 완료(대기방에 다시 들어올때)
+
+  START_BATTLE = 110;			// 멀티게임 시작
+  START = 111;
+  FINISH = 112;
+  WAIT_START = 113;				// 게임시작 타이머
+
+	UNLOCK_STAGE = 115;			// 스테이지 언락
+	RESET_STAGE = 116;			// 스테이지 리셋
+
+	LEVEL_UP = 120; 				// 캐릭터 레벨업
+	RESURRECTION = 121;			// 캐릭터 회생
+
+  INVITE = 130;   				// 친구 초대
+  WAIT_INVITE = 131;			// 친구 초대 타이머
+  CANCEL_INVITE = 132;		// 초대 취소
+  PURGE_PLAYER = 133; 		// 플레이어 강퇴
+
+  OPEN_ROOM = 140; 				// 방을 공개방으로 만든다
+	PARTY_BUDDIES = 141;		// 협력플레이 친구 목록
+
+	WAIT_SELECT_DUNGEON = 159;// 던전선택 타이머
+  QUERY_DUNGEON_LIST = 160; // 던전 리스트를 가져온다.
+  DUNGEON_LIST = 161; 			// 오픈된 던전 리스트(방장에게 오픈되어있는)
+  SELECT_DUNGEON = 162; 		// 선택된 던전 리스트
+  CLOSING_DUNGEON = 163; 		// 던전에서 모집 종료(방장커맨드)
+	WAIT_CLOSING_DUNGEON = 164;	// 던전에서 모집종료 타이머
+
+  QUERY_STAGE_LIST = 170;		// 선택된 던전에 열려있는 스테이지 리스트를 방장에게서 얻어옴
+  STAGE_LIST = 171; 				// 선택된 던전에 열려있는 스테이지 리스트
+  SELECT_STAGE = 172; 			// 방장이 선택한 스테이지
+  QUERY_STAGE_INFO = 173; 	// 방장에게서 스테이지 정보를 가져온다.
+}
+
+enum ErrorCode {
+  EC_INTERNAL = 1;
+  EC_VERSION = 2;
+  EC_NO_ROOM = 3; // 룸이 룸 서버에 존재하지 않음
+  EC_GAME_STARTED = 4; // 게임이 이미 시작되어 있음
+  EC_ALREADY_READY = 5; // 이미 대기 처리됨
+  EC_UNABLE_TO_OPERATE = 6; // 동작 불능
+  EC_NO_ROOM_MASTER = 7; // 방장만이 할 수 있는 명령
+  EC_PURGE_PLAYER = 8; // 강퇴된 사용자가 다시 재입장
+}
+
+
+message Request
+{
+  required MessageType type = 1;
+  optional int32 sequence = 2;
+
+  // gateway <-> room 간의 버전 확인
+  message Version
+  {
+    optional int32 protocol = 1 [default = 140911];
+    required string service = 2;
+  }
+
+  message Enter
+  {
+    required int32 room_id = 1;
+    required common.Player player = 2;   // 플레이어 정보
+    required bool private_room = 3;      // 비공개방 여부
+  }
+
+  message Invite
+  {
+    required int64 user_id = 1;
+    required int32 slot = 2;
+    required string invite_ip = 3;
+    required int32 invite_port = 4;
+  }
+
+  message SelectDungeon
+  {
+    required int32 dungeon_id = 2;
+  }
+
+  message SelectStage
+  {
+    required int32 stage_id = 1;
+    required int32 difficulty = 2;
+  }
+
+	message StartBattle
+	{
+		required int32 stage_id = 1;
+		required int32 difficulty = 2;
+	}
+
+  message Touch
+  {
+    required int32 x = 1;
+    required int32 y = 2;
+  }
+
+  message PurgePlayer
+  {
+    required int64 player_id = 1;
+  }
+
+	message UnlockStage
+	{
+		required int32 stage_id = 1;
+	}
+
+	message ResetStage
+	{
+		required int32 stage_id = 1;
+	}
+
+
+  optional Version    version = 10;
+  optional Enter      enter = 11;   // 들어올때의 개인 정보
+  optional string     leave = 12; // 나갈려는 사유
+
+	optional Enter			ready = 13;
+
+  optional string     chat = 20; // 채팅 요청
+	optional int32			emoticon = 21;	// 이모티콘
+
+  optional Invite     invite = 22; // 초대
+  optional int32      cancel_invite = 23; 	// 취소할 슬롯
+
+  optional common.Player level_up = 25;
+	optional common.Resurrection resurrection = 26;
+
+  optional common.Stages  stage_list = 29;
+  optional SelectDungeon select_dungeon = 30;
+
+  optional Touch      touch = 31;
+  optional PurgePlayer purge_player = 32;
+
+  optional common.EpicDungeons query_dungeon_list = 33; 
+  optional common.Stages query_stage_list = 34;
+
+  optional common.StageInfo query_stage_info = 35;
+
+  optional SelectStage select_stage = 36;
+	optional StartBattle start_battle = 37;
+
+	optional UnlockStage unlock_stage = 40;		// 스테이지 언락
+	optional ResetStage reset_stage = 41;			// 스테이지 리셋
+}
+
+
+
+message Response
+{
+  required MessageType type = 1;
+  required int32 sequence = 2;
+
+  // 에러 코드 처리
+  message Error
+  {
+    required ErrorCode code = 1;
+    required string reason = 2;
+  }
+
+  message Chat
+  {
+    required int64 player_id = 1;
+    required string message = 2;
+  }
+
+  message LeavePlayer
+  {
+    required int64 player_id = 1;
+    required string reason = 2;
+  }
+
+  message Ready
+  {
+    required int64 player_id = 1;
+  }
+
+  message Start
+  {
+		message Monster
+		{
+			required int32 monster_id = 1;	// 종류
+		}
+
+    required string stage_ip = 1;
+    required int32 stage_port = 2;
+		required int32 group_id = 3;
+		required int64 stage_id = 4;
+		required int32 difficulty = 5;
+		repeated Monster monsters = 6;	// 몬스터 디테일 정보
+    required int64 db_room_id = 7;
+    required string start_date = 8;
+		required string scene = 9;			// 유니티 씬
+  }
+
+  message Finish
+  {
+    message Rank {
+      required string nickname = 1;
+      required int32 score = 2;
+    }
+
+		optional common.FinishGame.Cleared clear = 1;
+		optional common.FinishGame.Failed fail = 2;
+    repeated Rank ranks = 3; // 랭크
+  }
+
+  message Leave 
+  {
+    message GameInfo 
+    {
+      required int32 play_time = 1;
+      required int32 exp = 2;
+      required int32 total_score = 3;
+      required int64 honbul = 4;
+    }
+
+    required string reason = 1; // 내보내는 이유
+    optional GameInfo game_info = 2; // 게임이 진행중일때 내보내진 경우
+  }
+
+  message WaitStart
+  {
+    required int64 player_id = 1;
+    required int32 seconds = 2;
+  }
+
+  message WaitInvite
+  {
+    required int32 slot = 1;
+    required int32 seconds = 2;
+  }
+
+	message UnlockStage
+	{
+		required int64 player_id = 1;
+		required int32 stage_id = 2;
+	}
+
+	message ResetStage
+	{
+		required int64 player_id = 1;
+		required int32 stage_id = 2;
+	}
+
+	message Emoticon
+	{
+    required int64 player_id = 1;
+    required int32 emoticon = 2;
+	}
+
+	message PartyBuddies
+	{
+		message Buddy
+		{
+			required int64 buddy_id = 1;
+		}
+
+		repeated Buddy buddies = 1;
+	}
+
+  message PurgePlayer
+  {
+    required int64 player_id = 1;
+  }
+
+  message SelectDungeon
+  {
+    required int64 player_id = 1;
+    required int32 dungeon_id = 2;
+  }
+
+  message SelectStage
+  {
+		required int64 player_id = 1;
+    required int32 stage_id = 2;
+    required int32 difficulty = 3;
+  }
+
+
+  message Touch
+  {
+    required int32 x = 1;
+    required int32 y = 2;
+    required int64 player_id = 3;
+  }
+
+  message QueryStageList
+  {
+    required int32 dungeon_id = 1;
+  }
+
+  message QueryStageInfo
+  {
+    required int32 stage_id = 1;
+    required int32 difficulty = 2;
+  }
+
+  message DungeonList
+  {
+    required common.EpicDungeons dungeons = 1;
+    required int32 battle_count = 2;
+  }
+
+	message WaitSelectDungeon
+	{
+		required int32 seconds = 1;
+	}
+
+  message WaitClosingDungeon
+  {
+    required int32 seconds = 1;
+  }
+
+  optional Error          error = 3;
+
+  optional common.Room    enter = 10; // 대기방의 구성 정보
+  optional Leave          leave = 11; // 내보내는 이유
+  optional Chat           chat = 100; // 채팅 전송
+
+  optional common.Player  new_player = 101; // 새 플레이어 들어옴
+  optional LeavePlayer    leave_player = 102; // 대기방에서 사용자가 나감
+
+  optional Ready          ready = 103; // 대기방 대기 상태
+
+  optional Start          start = 104; // 게임 시작 패킷
+  optional Finish         finish = 105; // 게임 종료 패킷
+  optional WaitStart      wait_start = 106; 		// 게임시작 타이머
+  optional WaitInvite     wait_invite = 107;		// 친구초대 타이머
+  optional int32          cancel_invite = 109; // 취소된 슬롯 번호
+
+  optional common.LevelUp level_up = 111; // 레벨업 현재 경험치
+
+	optional UnlockStage		unlock_stage = 115;	// 스테이지 언락
+	optional ResetStage			reset_stage = 116;	// 스테이지 리셋
+
+	optional Emoticon				emoticon = 120;	// 이모티콘
+	optional PartyBuddies		party_buddies = 121;		// 협력플레이 친구아이디
+  optional PurgePlayer    purge_player = 122; // 강퇴 플레이어 정보
+  optional DungeonList    dungeon_list = 123; // 오픈된 던전 종류
+  optional Touch          touch = 124; // 사용자가 터치한 위치 표시
+  optional common.Stages  stage_list = 125; // 선택할 스테이지 리스트
+  optional SelectDungeon  select_dungeon = 126; // 플레이어의 던전 선택
+  optional QueryStageInfo  query_stage_info = 127; // 스테이지 정보 요청
+  optional QueryStageList  query_stage_list = 128; // 스테이지 리스트 요청
+  optional SelectStage    select_stage = 129; 		// 스테이지 선택 정보
+	optional WaitClosingDungeon wait_closing_dungeon = 130;	// 던전선택 모집종료 타이머
+	optional WaitSelectDungeon wait_select_dungeon = 131;		// 던전선택 타이머
+}

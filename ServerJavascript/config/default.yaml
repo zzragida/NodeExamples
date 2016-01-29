@@ -1,0 +1,105 @@
+
+# for profiler
+profiler:
+  enable: false
+  interval: 60000 # ms
+
+
+# for network
+network:
+  dump_packet: true
+  dump_traffic: true
+
+
+# for database
+database:
+  debug: true
+
+
+# for abuse
+abuse:
+  validator: true
+
+
+# for logging
+logging:
+  - output: console
+    level: debug
+
+  - output: file
+    level: debug
+    filename: service.log
+
+
+# redis
+redis_monitor:
+  host: localhost
+  port: 6379
+  db: 0
+
+
+
+redis_presences:
+  - host: localhost
+    port: 6379
+    db: 1
+
+  - host: localhost
+    port: 6379
+    db: 2
+
+
+redis_match:
+  host: localhost
+  port: 6379
+  db: 3
+
+
+redis_ranking:
+  host: localhost
+  port: 6379
+  db: 4
+
+
+redis_ready:
+  host: localhost
+  port: 6379
+  db: 5
+
+
+redis_recommend:
+  host: localhost
+  port: 6379
+  db: 6
+
+
+redis_profiles:
+  - host: localhost
+    port: 6379
+    db: 8
+
+  - host: localhost
+    port: 6379
+    db: 9
+
+
+redis_buddies:
+  - host: localhost
+    port: 6379
+    db: 10
+
+  - host: localhost
+    port: 6379
+    db: 11
+
+
+redis_rank_profiles:
+  - host: localhost
+    port: 6379
+    db: 12
+
+  - host: localhost
+    port: 6379
+    db: 13
+
+

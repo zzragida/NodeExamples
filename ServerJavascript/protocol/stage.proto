@@ -1,0 +1,135 @@
+package m3.stage;
+
+import "common.proto";
+
+message StageToRoom
+{
+  enum MessageType 
+	{
+    READY = 100;
+    START = 102;
+    FINISH = 103;
+    LEAVE = 104;
+    PLAYER_CONNECTED = 105;
+    PING_PONG = 106;
+    LEVEL_UP = 107;
+		RESURRECTION = 108;
+		
+		CLEAR_CACHE = 300;
+  }
+
+  message Ready
+  {
+    required string ip = 1;
+    required int32 port = 2;
+		required int32 group_id = 3;
+  }
+
+  message Finish
+  {
+    message Player 
+		{
+			optional common.FinishGame.Cleared clear = 1;
+			optional common.FinishGame.Failed fail = 2;
+      required int64 player_id = 3;
+      required string nickname = 4;
+    }
+
+    repeated Player players = 1;
+  }
+
+
+  message Leave
+  {
+    required int64 player_id = 1;
+	  required int32 play_time = 2;		// 플레이 시간
+    required int32 exp = 3;					// 획득 경험치
+    required int32 total_score = 4; // 획득 점수
+    required int64 honbul = 5;			// 획득 혼불 
+  }
+
+
+  message PlayerConnected
+  {
+    required int64 player_id = 1;
+  }
+
+  message LevelUp
+  {
+    required int64 player_id = 1;
+		required int64 initial_exp = 2;		// 게임 시작시에 주어진 경험치
+		required int32 initial_level = 3;	// 게임 시작시에 주어진 레벨
+    required int64 curr_exp = 4;			// 현재 경험치
+  }
+
+	message Resurrection
+	{
+		required int64 player_id = 1;
+	}
+
+	message ClearCache
+	{
+		required common.CacheType type = 1;
+		required int32 action = 2;
+	}
+
+
+  required MessageType type = 1;
+
+  optional Ready ready = 3;
+  optional Leave leave = 4;
+  optional PlayerConnected player_connected = 5;
+  optional Finish finish = 6;
+  optional LevelUp level_up = 7;
+	optional Resurrection resurrection = 8;
+
+	optional ClearCache clear_cache = 30;
+}
+
+
+
+
+message RoomToStage
+{
+  enum MessageType 
+	{
+    START = 201;
+    LEAVE = 202;
+    PING_PONG = 203;
+    INFO = 204;
+    LEVEL_UP = 205;
+		RESURRECTION = 206;
+  }
+
+  message Leave
+  {
+    required int64 player_id = 1;
+  }
+
+	message Resurrection
+	{
+		required int64 player_id = 1;
+		optional int64 coin = 2;				// 부활하고 남은 코인
+		optional int64 cash = 3;				// 부활하고 남은 캐쉬
+	}
+
+  message Start
+  {
+    required common.Room room = 1;
+    required double exp_multiplier = 2; 				// 경험치 조정 팩터
+    required double monster_health_factor = 3; 	// 몬스터 체력 조정 팩터
+    required double monster_attack_factor = 4; 	// 몬스터 체력 조정 팩터
+    required double monster_defence_factor = 5; // 몬스터 체력 조정 팩터
+    required common.StageInfo stage_info = 6;
+  }
+
+  required MessageType type = 1;
+
+  optional Start start = 10; 
+  optional Leave leave = 11;
+  optional common.StageInfo info = 12;
+  optional common.Player level_up = 13;
+	optional Resurrection resurrection = 14;
+}
+
+

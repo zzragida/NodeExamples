@@ -1,0 +1,1685 @@
+'use strict'
+
+var router = require('express').Router()
+  , User = require('../user')
+  , monitor = require('../redis').MONITOR
+  , gateway = PROTOCOL.m3.gateway
+  , common = PROTOCOL.m3.common
+  , room = PROTOCOL.m3.room
+  , handlers = {}
+  , responses = {};
+
+/* ------------------------------------------------------------- */
+
+function makeResponse(request) {
+  var response;
+
+  if (responses[request.type]) {
+    response = responses[request.type];
+  } else {
+    response = new gateway.Response();
+    response.type = request.type;
+    responses[request.type] = response;
+  }
+  
+  response.sequence = request.sequence + 1;
+  response.checksum = 0;
+  return response;
+}
+
+function error(response, code, reason) {
+  response.error = new gateway.Response.Error({code:code, reason:reason});
+  return Promise.resolve(response);
+}
+
+function decode(data) {
+  var encodedString = new Buffer(data, 'base64');
+  return gateway.Request.decode(encodedString);
+}
+
+function encode(response) {
+  return response.encode().toBuffer().toString('base64');
+}
+
+/* ------------------------------------------------------------- */
+
+// /api request router
+router.post('/', function (req, res, next) {
+  logger.debug(req.user);
+
+  logger.startProfile('handler');
+
+  // 메모리에 캐시된 사용자 정보 확인
+  var userId = req.user.userId;
+  var user = Users[userId];
+  if (!user) {
+    user = new User(userId);
+    Users[userId] = userId;
+  }
+
+  // TODO: 레디스에 캐시된 사용자 정보 확인
+
+  // 요청정보 디코딩
+  var request = decode(req.body.data);
+
+  // 요청 처리
+  handlers[request.type](request, user).then(function (response) {
+    res.send(encode(response));
+  }, function (err) {
+    logger.error(err);
+    res.send(err);
+  });
+
+  logger.endProfile('handler');
+});
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.NONE] = function (request) {
+  var response = makeResponse(request);
+  return error(response, gateway.ErrorCode.EC_INTERNAL, '');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.VERSION] = function (request) {
+  logger.debug(request.version);
+
+  var response = makeResponse(request);
+
+  if (request.version.service != '0.1-test') {
+    return error(response, gateway.ErrorCode.EC_VERSION, '서비스 버전이 맞지 않음');
+  }
+
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.LOGIN] = function (request) {
+  logger.debug(request.login);
+
+  var response = makeResponse(request);
+  response.login = new gateway.Response.Login({
+      plug_ip: '127.0.0.1'
+    , plug_port: 9000
+    , passwd: 'password'
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.LOGOUT] = function (request) {
+  logger.debug(request.logout);
+
+  throw new NotImplementedError('logout handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.QUIT] = function (request) {
+  logger.debug(request.quit);
+
+  throw new NotImplementedError('quit handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.PLUG] = function (request) {
+  logger.debug(request.plug);
+
+  throw new NotImplementedError('plug handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.INFO] = function (request, user) {
+  logger.debug(request.info);
+  logger.debug(user);
+
+  var response = makeResponse(request);
+
+  return new Promise(function (resolve, reject) {
+
+    // 사용자 정보 로딩
+    user.load(function (err, user) {
+      logger.info(err);
+      logger.info(user);
+
+      if (err) reject(err);
+      resolve(user);
+    });
+
+  }).then(function (user) {
+
+    response.info = new common.GameInfo({
+        honbul: user.honbul
+      , cash: user.cash
+      , talisman: user.talisman
+      , stone: user.stone
+      , coin: user.coin
+      , heart: user.heart
+      , inventory_size: user.inventorySize
+      , searchable: user.searchable
+      , vip_level: user.vipLevel
+      , no_facebook_message: user.noFacebookMessage
+      , no_facebook_profile: user.noFacebookProfile
+      , review: user.review
+      , mycard: user.mycard
+      }); 
+    return Promise.resolve(response);
+
+  }).catch(function (err) {
+    return error(response, gateway.ErrorCode.EC_DATABASE, '사용자 정보로딩');
+  });
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.PROPERTIES] = function (request) {
+  logger.debug(request.properties);
+
+  var response = makeResponse(request);
+  response.properties = new common.Properties({
+      honbul_for_expand_skill_button: 0
+    , cash_for_expand_skill_button: 0
+    , reset_cash_for_material_cooltime: 0
+    , collect_material_multiplier: 0
+    , max_reset_material_cooltime: 0
+    , cash_for_resurrection: 0
+    , coin_for_resurrection: 0
+    , needs_resurrection_by_cash: 0
+    , needs_resurrection_by_coin: 0
+    , hero_level_for_multiplay: 0
+    , level_for_new_archer: 0
+    , honbul_for_new_hero: 0
+    , cash_for_inventory_slot: 0
+    , max_hero_level: 80
+    , send_heart_amount: 10
+    , reward_of_send_heart: 0
+    , max_friend_count: 10
+    , reward_of_facebook_invitation: 0
+    , battle_skip_star1: 0
+    , battle_skip_star2: 0
+    , battle_skip_star3: 0
+    , battle_skip_star4: 0
+    , battle_skip_star5: 0
+    , honbul_for_battle_skip: 10
+    , battle_skip_exp: 0
+    , battle_skip_probability: 0
+    , discount_for_oni_shop_honbul: 0
+    , discount_for_oni_shop_cash: 0
+    , discount_for_reset_skill: 0
+    , survival_exp_factor: 1.0
+    , survival_honbul_factor: 1.0
+    , survival_max_resurrection: 1
+    , survival_ingame_heal: 0
+    , survival_refill_price: 0
+    , promotion_onoff: false
+    , coupon_onoff: false
+    , cafe_onoff: false
+    , guest_login_onoff: false
+    , community_url: ''
+    , closing_dungeon_timeout: 0
+    , select_stage_timeout: 0
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.BADGES] = function (request) {
+  logger.debug(request.bades);
+
+  var response = makeResponse(request);
+  response.badges = new common.Badges({
+      gift_count: 0
+    , blueprint: 0
+    , costume_event: 0
+    , hearts_to_receive: 0
+    , ask_friendships: 0
+    , achivement: 0
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.NICKNAME] = function (request) {
+  logger.debug(request.nickname);
+
+  var response = makeResponse(request);
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.MAKE_HERO] = function (request) {
+  logger.debug(request.make_hero);
+
+  var response = makeResponse(request);
+  response.make_hero = new common.Hero({
+      job: 1
+    , level: 1
+    , curr_exp: 100
+    , next_exp: 300
+    , playing_time: 1000
+    , epic_progress: 30
+    , skill_rate: 1
+    , skill_point: 10
+    , unlock_stage_count: 1
+    , attributes: new common.Attributes({
+          hp: 100
+        , mp: 100
+        , atk: 100
+        , atr: 0.0
+        , def: 1
+        , dfr: 0.0
+        , ctr: 0.0
+        , ctd: 0.0
+        , ccm: 1
+        , dex: 1
+        , hpr: 1
+        , hpt: 0.0
+        , mpr: 1
+        , mpt: 0.0
+        , hb: 0.0
+        , ctm: 0.0
+        , mov: 0.0
+        , exp: 0.0
+      })
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.SELECT_HERO] = function (request) {
+  logger.debug(request.select_hero);
+
+  var response = makeResponse(request);
+  response.select_hero = new common.Hero({
+      job: 1
+    , level: 1
+    , curr_exp: 100
+    , next_exp: 300
+    , playing_time: 1000
+    , epic_progress: 30
+    , skill_rate: 1
+    , skill_point: 10
+    , unlock_stage_count: 1
+    , attributes: new common.Attributes({
+          hp: 100
+        , mp: 100
+        , atk: 100
+        , atr: 0.0
+        , def: 1
+        , dfr: 0.0
+        , ctr: 0.0
+        , ctd: 0.0
+        , ccm: 1
+        , dex: 1
+        , hpr: 1
+        , hpt: 0.0
+        , mpr: 1
+        , mpt: 0.0
+        , hb: 0.0
+        , ctm: 0.0
+        , mov: 0.0
+        , exp: 0.0
+      })
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.HEROES] = function (request) {
+  logger.debug(request.heroes);
+
+  var response = makeResponse(request);
+  response.heroes = [
+      new gateway.Response.Hero({job:1, level:2})
+    , new gateway.Response.Hero({job:2, level:10})
+  ];
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.DUNGEONS] = function (request) {
+  logger.debug(request.dungeons);
+
+  var response = makeResponse(request);
+  response.dungeons = new common.Dungeons({
+      story: null
+    , survival: null
+    , daily: null
+    , event: null
+    , multi: new common.Dungeons.Multi({
+          enable: true
+        , reward: false
+        , next_start_timestamp: 10000
+        , next_end_timestamp: 20000
+      })
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.EPIC_DUNGEONS] = function (request) {
+  logger.debug(request.epic_dungeons);
+
+  var response = makeResponse(request);
+  response.epic_dungeons = new common.EpicDungeons([
+      new common.EpicDungeons.Dungeon({
+          dungeon_id: 1000
+        , lock: false
+        , new_stage: true
+        , going_stage: false
+      })
+    , new common.EpicDungeons.Dungeon({
+          dungeon_id: 2000
+        , lock: true
+        , new_stage: true
+        , going_stage: false
+      })
+  ]);
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.STAGES] = function (request) {
+  logger.debug(request.stages);
+
+  var response = makeResponse(request);
+  response.stages = new common.Stages({
+      dungeon_id: 1000
+    , stages: []
+    , event: new common.GameEvent({
+          exp: 1
+        , honbul: 2
+        , material: 3
+        , start_timestamp: 100000
+        , end_timestamp: 200000
+      })
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.UNLOCK_STAGE] = function (request) {
+  logger.debug(request.unlock_stage);
+
+  var response = makeResponse(request);
+  response.unlock_stage = new gateway.Response.UnlockStage({
+      cash: 10
+    , stages: new common.Stages({
+        dungeon_id: 1000
+      , stages: []
+      , event: new common.GameEvent({
+            exp: 1
+          , honbul: 2
+          , material: 3
+          , start_timestamp: 100000
+          , end_timestamp: 200000
+        })
+      })
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.RESET_STAGE] = function (request) {
+  logger.debug(request.reset_stage);
+
+  var response = makeResponse(request);
+  response.unlock_stage = new gateway.Response.ResetStage({
+      cash: 10
+    , stages: new common.Stages({
+        dungeon_id: 1000
+      , stages: []
+      , event: new common.GameEvent({
+            exp: 1
+          , honbul: 2
+          , material: 3
+          , start_timestamp: 100000
+          , end_timestamp: 200000
+        })
+      })
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.QUERY_STAGE] = function (request) {
+  logger.debug(request.query_stage);
+
+  var response = makeResponse(request);
+  response.query_stage = new gateway.Response.QueryStage({
+      unlock: false
+    , cooltime: false
+    , level: false
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.HEART] = function (request) {
+  logger.debug(request.heart);
+
+  var response = makeResponse(request);
+  response.heart = new gateway.Response.Heart({
+      heart_count: 100
+    , max_heart: 100
+    , next_time: 20
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.ESHOP] = function (request) {
+  logger.debug(request.eshop);
+
+  var response = makeResponse(request);
+  response.eshop = new common.Eshop({
+      market: common.MarketType.MARKET_PLAYSTORE
+    , event: common.EshopEventType.ESHOP_EVENT_NONE
+    , cooltime: 2
+    , goods: []
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.BUY_IN_ESHOP] = function (request) {
+  logger.debug(request.buy_in_eshop);
+
+  var response = makeResponse(request);
+  response.buy_in_eshop = new gateway.Response.BuyInEshop({
+      cash: request.buy_in_eshop.cash
+    , next_event: false
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.CASH_SHOP] = function (request) {
+  logger.debug(request.cash_shop);
+
+  var response = makeResponse(request);
+  response.cash_shop = new gateway.Response.CashShop({
+      eshop: new common.Eshop({
+          market: common.MarketType.MARKET_PLAYSTORE
+        , event: common.EshopEventType.ESHOP_EVENT_NONE
+        , cooltime: 2
+        , goods: []
+      })
+    , cash_shop: new common.CashShop({
+          goods: []
+      })
+    , discount_vip: 10
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.BUY_IN_CASH_SHOP] = function (request) {
+  logger.debug(request.buy_in_cash_shop);
+
+  var response = makeResponse(request);
+  response.buy_in_cash_shop = new gateway.Response.BuyInCashShop({
+      cash: 10
+    , talisman: 10
+    , stone: 10
+    , coin: 10
+    , heart: 10
+    , honbul: 10
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.ONI_SHOP] = function (request) {
+  logger.debug(request.oni_shop);
+
+  var response = makeResponse(request);
+  response.oni_shop = new gateway.Response.OniShop({
+      goods: []
+    , reset_skill: null
+    , discount_vip: null
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.BUY_IN_ONI_SHOP] = function (request) {
+  logger.debug(request.buy_in_oni_shop);
+
+  var response = makeResponse(request);
+  response.buy_in_oni_shop = new gateway.Response.BuyInOniShop({
+      cash: 10
+    , honbul: 10
+    , item_no: 20000
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.COSTUMES] = function (request) {
+  logger.debug(request.costumes);
+
+  var response = makeResponse(request);
+  response.costumes = new gateway.Response.Costumes({
+      job: 1
+    , selected_costume_id: 11000
+    , costumes: [
+        new gateway.Response.Costumes.Costume({
+            costume_id: 11000
+          , selected: true
+          , reinforce: false
+          , level: 1
+        })
+      , new gateway.Response.Costumes.Costume({
+            costume_id: 12000
+          , selected: false
+          , reinforce: true
+          , level: 2
+        })
+    ]
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.SELECT_COSTUME] = function (request) {
+  logger.debug(request.select_costume);
+
+  var response = makeResponse(request);
+  response.select_costume = new common.Hero({
+      job: 1
+    , level: 1
+    , curr_exp: 100
+    , next_exp: 300
+    , playing_time: 1000
+    , epic_progress: 30
+    , skill_rate: 1
+    , skill_point: 10
+    , unlock_stage_count: 1
+    , attributes: new common.Attributes({
+          hp: 100
+        , mp: 100
+        , atk: 100
+        , atr: 0.0
+        , def: 1
+        , dfr: 0.0
+        , ctr: 0.0
+        , ctd: 0.0
+        , ccm: 1
+        , dex: 1
+        , hpr: 1
+        , hpt: 0.0
+        , mpr: 1
+        , mpt: 0.0
+        , hb: 0.0
+        , ctm: 0.0
+        , mov: 0.0
+        , exp: 0.0
+      })
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.COSTUMES_TO_MAKE] = function (request) {
+  logger.debug(request.costumes_to_make);
+
+  var response = makeResponse(request);
+  response.costumes_to_make = new gateway.Response.CostumesToMake({
+      job: 1
+    , costumes: [
+        new gateway.Response.CostumesToMake.Costume({
+            part1: true
+          , part2: false
+          , part3: false
+          , part4: false
+          , part5: false
+          , part6: true
+          , costume_id: 12000
+        })
+      , new gateway.Response.CostumesToMake.Costume({
+            part1: true
+          , part2: false
+          , part3: false
+          , part4: false
+          , part5: false
+          , part6: true
+          , costume_id: 13000
+        })
+    ]
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.MAKE_COSTUME] = function (request) {
+  logger.debug(request.make_costume);
+
+  var response = makeResponse(request);
+  response.make_costume = new gateway.Response.MakeCostume({
+      honbul: 100
+    , costumes: new gateway.Response.CostumesToMake({
+        job: 1
+      , costumes: [
+          new gateway.Response.CostumesToMake.Costume({
+              part1: true
+            , part2: false
+            , part3: false
+            , part4: false
+            , part5: false
+            , part6: true
+            , costume_id: 12000
+          })
+        , new gateway.Response.CostumesToMake.Costume({
+              part1: true
+            , part2: false
+            , part3: false
+            , part4: false
+            , part5: false
+            , part6: true
+            , costume_id: 13000
+          })
+      ]
+    })
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.BUY_COSTUME] = function (request) {
+  logger.debug(request.buy_costume);
+
+  var response = makeResponse(request);
+  response.buy_costume = new gateway.Response.BuyCostume({
+      cash: 100
+    , costumes: new gateway.Response.CostumesToMake({
+        job: 1
+      , costumes: [
+          new gateway.Response.CostumesToMake.Costume({
+              part1: true
+            , part2: false
+            , part3: false
+            , part4: false
+            , part5: false
+            , part6: true
+            , costume_id: 12000
+          })
+        , new gateway.Response.CostumesToMake.Costume({
+              part1: true
+            , part2: false
+            , part3: false
+            , part4: false
+            , part5: false
+            , part6: true
+            , costume_id: 13000
+          })
+      ]
+    })
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.COSTUMES_TO_REINFORCE] = function (request) {
+  logger.debug(request.costumes_to_reinforce);
+
+  var response = makeResponse(request);
+  response.costumes_to_reinforce = new gateway.Response.CostumesToReinforce({
+      job: 1
+    , costumes: [
+        new gateway.Response.CostumesToReinforce.Costume({
+            part1: true
+          , part2: false
+          , part3: false
+          , part4: false
+          , part5: false
+          , part6: true
+          , costume_id: 12000
+          , level: 1
+        })
+      , new gateway.Response.CostumesToReinforce.Costume({
+            part1: true
+          , part2: false
+          , part3: false
+          , part4: false
+          , part5: false
+          , part6: true
+          , costume_id: 13000
+          , level: 2
+        })
+    ]
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.REINFORCE_COSTUME] = function (request) {
+  logger.debug(request.reinforce_costume);
+
+  var response = makeResponse(request);
+  response.reinforce_costume = new gateway.Response.ReinforceCostume({
+      cash: 100
+    , honbul: 1000
+    , costumes: new gateway.Response.CostumesToReinforce({
+        job: 1
+      , costumes: [
+          new gateway.Response.CostumesToReinforce.Costume({
+              part1: true
+            , part2: false
+            , part3: false
+            , part4: false
+            , part5: false
+            , part6: true
+            , costume_id: 12000
+            , level: 1
+          })
+        , new gateway.Response.CostumesToReinforce.Costume({
+              part1: true
+            , part2: false
+            , part3: false
+            , part4: false
+            , part5: false
+            , part6: true
+            , costume_id: 13000
+            , level: 2
+          })
+      ]
+    })
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.INVENTORY] = function (request) {
+  logger.debug(request.inventory);
+
+  var response = makeResponse(request);
+  response.inventory = new common.Inventory({
+      limit: 100
+    , honbul: 1000
+    , cash: 100
+    , entries: []
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.EXPAND_INVENTORY] = function (request) {
+  logger.debug(request.expand_inventory);
+
+  var response = makeResponse(request);
+  response.expand_inventory = new gateway.Response.ExpandInventory({
+      spend_cash: 10
+    , inventory_size: 30
+    , cash: 1000
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.DROP_ITEM] = function (request) {
+  logger.debug(request.drop_item);
+
+  var response = makeResponse(request);
+  response.drop_item = new gateway.Response.DropItem({
+      total: 10
+    , drop: 9
+    , remain: 1
+    , gain_honbul: 1000
+    , gain_stone: 10
+    , honbul: 1000
+    , stone: 22
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.PUT_ON] = function (request) {
+  logger.debug(request.put_on);
+
+  var response = makeResponse(request);
+  response.put_on = new common.Hero({
+      job: 1
+    , level: 1
+    , curr_exp: 100
+    , next_exp: 300
+    , playing_time: 1000
+    , epic_progress: 30
+    , skill_rate: 1
+    , skill_point: 10
+    , unlock_stage_count: 1
+    , attributes: new common.Attributes({
+          hp: 100
+        , mp: 100
+        , atk: 100
+        , atr: 0.0
+        , def: 1
+        , dfr: 0.0
+        , ctr: 0.0
+        , ctd: 0.0
+        , ccm: 1
+        , dex: 1
+        , hpr: 1
+        , hpt: 0.0
+        , mpr: 1
+        , mpt: 0.0
+        , hb: 0.0
+        , ctm: 0.0
+        , mov: 0.0
+        , exp: 0.0
+      })
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.TAKE_OFF] = function (request) {
+  logger.debug(request.take_off);
+
+  var response = makeResponse(request);
+  response.take_off = new common.Hero({
+      job: 1
+    , level: 1
+    , curr_exp: 100
+    , next_exp: 300
+    , playing_time: 1000
+    , epic_progress: 30
+    , skill_rate: 1
+    , skill_point: 10
+    , unlock_stage_count: 1
+    , attributes: new common.Attributes({
+          hp: 100
+        , mp: 100
+        , atk: 100
+        , atr: 0.0
+        , def: 1
+        , dfr: 0.0
+        , ctr: 0.0
+        , ctd: 0.0
+        , ccm: 1
+        , dex: 1
+        , hpr: 1
+        , hpt: 0.0
+        , mpr: 1
+        , mpt: 0.0
+        , hb: 0.0
+        , ctm: 0.0
+        , mov: 0.0
+        , exp: 0.0
+      })
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.REINFORCE_ITEM] = function (request) {
+  logger.debug(request.reinforce_item);
+
+  var response = makeResponse(request);
+  request.reinforce_item = new gateway.Response.ReinforceItem({
+      success: true
+    , broken: false
+    , item_id: 11000
+    , stone: 10
+    , honbul: 1111
+    , cash: 1000
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.FIX_ITEM] = function (request) {
+  logger.debug(request.fix_item);
+
+  var response = makeResponse(request);
+  response.fix_item = new gateway.Response.FixItem({
+      item_id: 11000
+    , cost: 100
+    , cash: 1000
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.MAKE_ITEM] = function (request) {
+  logger.debug(request.make_item);
+
+  var response = makeResponse(request);
+  response.make_item = new gateway.Response.MakeItem({
+      blueprint_no: 10000
+    , item_id: 10000
+    , item_no: 20000
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.LOTTERYS] = function (request) {
+  logger.debug(request.lotterys);
+
+  var response = makeResponse(request);
+  response.lotterys = new gateway.Response.Lotterys({
+      lotterys: null
+    , events: []
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.TAKE_LOTTERY] = function (request) {
+  logger.debug(request.take_lottery);
+
+  var response = makeResponse(request);
+  response.take_lottery = new gateway.Response.TakeLottery({
+      cash: 100
+    , talisman: 10
+    , gifts: []
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.ROOM] = function (request) {
+  logger.debug(request.room);
+
+  throw new NotImplementedError('room handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.RESURRECTION] = function (request) {
+  logger.debug(request.resurrection);
+
+  throw new NotImplementedError('resurrection handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.SKILLS] = function (request) {
+  logger.debug(request.skills);
+
+  var response = makeResponse(request);
+  response.skills = new gateway.Response.Skills({
+      job: 1
+    , skills: [
+        new gateway.Response.Skills.Skill({
+            skill_id: 1000
+          , level: 1
+          , lock: false
+          , max_level: false
+        })
+    ]
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.EXPAND_SKILL_BUTTON] = function (request) {
+  logger.debug(request.expand_skill_button);
+
+  var response = makeResponse(request);
+  response.expand_skill_button = new gateway.Response.ExpandSkillButton({
+      hero: new common.Hero({
+        job: 1
+      , level: 1
+      , curr_exp: 100
+      , next_exp: 300
+      , playing_time: 1000
+      , epic_progress: 30
+      , skill_rate: 1
+      , skill_point: 10
+      , unlock_stage_count: 1
+      , attributes: new common.Attributes({
+            hp: 100
+          , mp: 100
+          , atk: 100
+          , atr: 0.0
+          , def: 1
+          , dfr: 0.0
+          , ctr: 0.0
+          , ctd: 0.0
+          , ccm: 1
+          , dex: 1
+          , hpr: 1
+          , hpt: 0.0
+          , mpr: 1
+          , mpt: 0.0
+          , hb: 0.0
+          , ctm: 0.0
+          , mov: 0.0
+          , exp: 0.0
+        })
+      })
+    , cash: 1000
+    , honbul: 10000
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.SKILL_BUTTON] = function (request) {
+  logger.debug(request.skill_button);
+
+  var response = makeResponse(request);
+  response.take_off = new common.Hero({
+      job: 1
+    , level: 1
+    , curr_exp: 100
+    , next_exp: 300
+    , playing_time: 1000
+    , epic_progress: 30
+    , skill_rate: 1
+    , skill_point: 10
+    , unlock_stage_count: 1
+    , attributes: new common.Attributes({
+          hp: 100
+        , mp: 100
+        , atk: 100
+        , atr: 0.0
+        , def: 1
+        , dfr: 0.0
+        , ctr: 0.0
+        , ctd: 0.0
+        , ccm: 1
+        , dex: 1
+        , hpr: 1
+        , hpt: 0.0
+        , mpr: 1
+        , mpt: 0.0
+        , hb: 0.0
+        , ctm: 0.0
+        , mov: 0.0
+        , exp: 0.0
+      })
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.REINFORCE_SKILL] = function (request) {
+  logger.debug(request.reinforce_skill);
+
+  var response = makeResponse(request);
+  response.reinforce_skill = new gateway.Response.ReinforceSkill({
+      skills: new gateway.Response.Skills({
+        job: 1
+      , skills: []
+      })
+    , honbul: 10000
+    , hero: new common.Hero({
+        job: 1
+      , level: 1
+      , curr_exp: 100
+      , next_exp: 300
+      , playing_time: 1000
+      , epic_progress: 30
+      , skill_rate: 1
+      , skill_point: 10
+      , unlock_stage_count: 1
+      , attributes: new common.Attributes({
+            hp: 100
+          , mp: 100
+          , atk: 100
+          , atr: 0.0
+          , def: 1
+          , dfr: 0.0
+          , ctr: 0.0
+          , ctd: 0.0
+          , ccm: 1
+          , dex: 1
+          , hpr: 1
+          , hpt: 0.0
+          , mpr: 1
+          , mpt: 0.0
+          , hb: 0.0
+          , ctm: 0.0
+          , mov: 0.0
+          , exp: 0.0
+        })
+      })
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.SKILL_AUTO_ASSIGN] = function (request) {
+  logger.debug(request.skill_auto_assign);
+
+  var response = makeResponse(request);
+  response.skill_auto_assign = new common.Hero({
+      job: 1
+    , level: 1
+    , curr_exp: 100
+    , next_exp: 300
+    , playing_time: 1000
+    , epic_progress: 30
+    , skill_rate: 1
+    , skill_point: 10
+    , unlock_stage_count: 1
+    , attributes: new common.Attributes({
+          hp: 100
+        , mp: 100
+        , atk: 100
+        , atr: 0.0
+        , def: 1
+        , dfr: 0.0
+        , ctr: 0.0
+        , ctd: 0.0
+        , ccm: 1
+        , dex: 1
+        , hpr: 1
+        , hpt: 0.0
+        , mpr: 1
+        , mpt: 0.0
+        , hb: 0.0
+        , ctm: 0.0
+        , mov: 0.0
+        , exp: 0.0
+      })
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.RESET_SKILL] = function (request) {
+  logger.debug(request.reset_skill);
+
+  var response = makeResponse(request);
+  response.reset_skill = new gateway.Response.ResetSkill({
+      skills: new gateway.Response.Skills({
+        job: 1
+      , skills: []
+      })
+    , skill_point: 100
+    , honbul: 10000
+    , button_a: 1101
+    , button_b: 1102
+    , button_c: 1103
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.FIND_BUDDY] = function (request) {
+  throw new NotImplementeError('findBuddy handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.BUDDIES] = function (request) {
+  logger.debug(request.buddies);
+
+  var response = makeResponse(request);
+  response.buddies = new gateway.Response.Buddies({
+      buddies: []
+    , heart: 100
+    , story_score: 10000
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.ASK_FRIENDSHIPS] = function (request) {
+  throw new NotImplementedError('askFriendships handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.SEND_HEART] = function (request) {
+  throw new NotImplementedError('sendHeart handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.RECEIVE_HEART] = function (request) {
+  throw new NotImplementedError('receiveHeart handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.RECEIVE_HEART_ALL] = function (request) {
+  throw new NotImplementedError('receiveHeartAll handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.ACCEPT_FRIENDSHIP] = function (request) {
+  throw new NotImplementedError('acceptFriendship handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.REJECT_FRIENDSHIP] = function (request) {
+  throw new NotImplementedError('rejectFriendship handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.EXFRIEND] = function (request) {
+  throw new NotImplementedError('exfriend handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.PROPOSE_BUDDY] = function (request) {
+  throw new NotImplementedError('proposeBuddy handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.SEARCHABLE] = function (request) {
+  throw new NotImplementedError('searchable handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.RECOMMEND_FRIENDSHIPS] = function (request) {
+  throw new NotImplementedError('recommendFriendships handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.FRIEND_PROFILE] = function (request) {
+  throw new NotImplementedError('friendProfile handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.BUDDIES_TO_INVITE_GAME] = function (request) {
+  throw new NotImplementedError('buddiesToInviteGame handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.INVITE_BUDDY_TO_PLAY_GAME] = function (request) {
+  throw new NotImplementedError('inviteBuddyToPlayGame handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.BE_INVITED_TO_PLAY_GAME] = function (request) {
+  throw new NotImplementedError('beInvitedToPlayGame handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.ACCEPT_GAME_INVITATION] = function (request) {
+  throw new NotImplementedError('acceptGameInvitation handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.DECLINE_GAME_INVITATION] = function (request) {
+  throw new NotImplementedError('declineGameInvitation handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.CANCEL_GAME_INVITATION] = function (request) {
+  throw new NotImplementedError('cancelGameInvitation handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.CHANGE_PUBLIC_ROOM] = function (request) {
+  throw new NotImplementedError('changePublicRoom handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.START_GAME] = function (request) {
+  throw new NotImplementedError('startGame handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.FINISH_GAME] = function (request) {
+  throw new NotImplementedError('finishGame handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.SECOND_TREASURE] = function (request) {
+  throw new NotImplementedError('secondTreasure handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.START_SURVIVAL_GAME] = function (request) {
+  throw new NotImplementedError('startSurvivalGame handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.FINISH_SURVIVAL_GAME] = function (request) {
+  throw new NotImplementedError('finishSurvivalGame handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.BATTLE_SKIP] = function (request) {
+  throw new NotImplementedError('battleSkip handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.RANKING] = function (request) {
+  throw new NotImplementedError('ranking handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.RANKER] = function (request) {
+  throw new NotImplementedError('ranker handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.DROP_OUT] = function (request) {
+  throw new NotImplementedError('dropOut handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.CONFIRM_TO_DROP_OUT] = function (request) {
+  throw new NotImplementedError('confirmToDropOut handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.GIFTS] = function (request) {
+  var response = makeResponse(request);
+  response.gifts = new gateway.Response.Gifts([
+      new gateway.Response.Gifts.Gift({
+          gift_id: 1
+        , gift_pid: 2
+        , count: 1
+        , item_id: 2
+        , title: 'Gift'
+        , message: 'Gift Message'
+        , cooltime: 100
+      })
+    , new gateway.Response.Gifts.Gift({
+          gift_id: 1
+        , gift_pid: 2
+        , count: 1
+        , item_id: 2
+        , title: 'Gift'
+        , message: 'Gift Message'
+        , cooltime: 100
+      })
+  ]);
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.TAKE_GIFT] = function (request) {
+  logger.debug(request.take_gift.gift_id.low);
+ 
+  var response = makeResponse(request);
+  response.take_gift = new gateway.Response.TakeGift({
+      gift_pid: 2
+    , count: 2
+    , item_id: 1000
+    , gift_type: common.GiftType.GIFT_CASH
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.TUTORIAL] = function (request) {
+  logger.debug(request.tutorial.step);
+
+  var response = makeResponse(request);
+  response.tutorial = new gateway.Response.Tutorial({
+      step1: true
+    , step2: true
+    , step3: true
+    , step4: true
+    , step5: true
+    , step6: true
+    , step7: true
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.LEVEL_UP] = function (request) {
+  throw new NotImplementedError('levelUp handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.WAVE] = function (request) {
+  throw new NotImplementedError('wave handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.DAILYSTAMP] = function (request) {
+  throw new NotImplementedError('dailystamp handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.EXCHANGE_HEART] = function (request) {
+  throw new NotImplementedError('exchangeHeart handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.ACHIVEMENT] = function (request) {
+  throw new NotImplementedError('achivement handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.ACHIVEMENT_REWARD] = function (request) {
+  throw new NotImplementedError('achivementReward handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.FACEBOOK_INVITATION] = function (request) {
+  throw new NotImplementedError('facebookInvitation handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.INVITED_FACEBOOK_FRIENDS] = function (request) {
+  throw new NotImplementedError('invitedFacebookFriends handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.COLLECT_MATERIAL] = function (request) {
+  throw new NotImplementedError('collectMaterial handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.MATERIAL_COOLTIME] = function (request) {
+  throw new NotImplementedError('materialCooltime handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.RESET_MATERIAL_COOLTIME] = function (request) {
+  throw new NotImplementedError('resetMaterialCooltime handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.QUERY_PROMOTION] = function (request) {
+  logger.debug(request.query_promotion);
+
+  var response = makeResponse(request);
+  response.query_promotion = new gateway.Response.QueryPromotion({
+      onoff: false
+    , promoted: true
+  });
+  return Promise.resolve(response);
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.PROMOTER] = function (request) {
+  throw new NotImplementedError('promoter handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.PROMOTION_COUNT] = function (request) {
+  throw new NotImplementedError('promotionCount handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.LINK_FACEBOOK_FRIENDS] = function (request) {
+  throw new NotImplementedError('linkFacebookFriends handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.UNLINK_FACEBOOK_FRIENDS] = function (request) {
+  throw new NotImplementedError('unlinkFacebookFriends handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.FACEBOOK_FRIENDS] = function (request) {
+  throw new NotImplementedError('facebookFriends handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.FACEBOOK_OPTIONS] = function (request) {
+  throw new NotImplementedError('facebookOptions handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.QUERY_FACEBOOK_OPTIONS] = function (request) {
+  throw new NotImplementedError('queryFacebookOptions handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.COUPON] = function (request) {
+  throw new NotImplementedError('coupon handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.KEYWORD_COUPON] = function (request) {
+  throw new NotImplementedError('keywordCoupon handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.COUPON_HISTORY] = function (request) {
+  throw new NotImplementedError('couponHistory handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.ACCOUNT_MERGE] = function (request) {
+  throw new NotImplementedError('accontMerge handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.CONFIRM_TO_ACCOUNT_MERGE] = function (request) {
+  throw new NotImplementedError('confirmToAccountMerge handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.VIP] = function (request) {
+  throw new NotImplementedError('vip handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.SURVIVAL_BUFF] = function (request) {
+  throw new NotImplementedError('survivalBuff handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.REFILL_SURVIVAL_CHALLENGE] = function (request) {
+  throw new NotImplementedError('refillSurvivalChallenge handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.REVIVAL] = function (request) {
+  throw new NotImplementedError('revival handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.PUSH] = function (request) {
+  throw new NotImplementedError('push handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.TEST_PARAM] = function (request) {
+  throw new NotImplementedError('testParam handler');
+};
+
+/* ------------------------------------------------------------- */
+
+module.exports = router;

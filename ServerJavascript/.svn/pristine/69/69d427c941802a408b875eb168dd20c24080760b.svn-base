@@ -1,0 +1,47 @@
+test_gateway:
+  id: 102
+  host: 10.30.76.13
+  port: 6000
+
+  thread_pool_size: 10
+  client_timeout: 60 # seconds
+  online_timeout: 180 # seconds
+  update_interval: 60 # seconds
+
+  max_connection: 20000
+
+  max_heart: 5
+  heart_per_seconds: 60 # seconds
+
+  intercom:
+    host: 192.168.122.180
+    port: 6102
+
+  statistics: http://10.30.76.13:8100/monitor/update/kjs/gateway
+
+#  skip_version_check: true
+#  allow_multiple_request_to_presence: true
+#  shutdown_after_detach: 0
+
+#  starting_date: 2013-04-01
+
+
+
+test_room:
+  id: 103
+  host: 10.30.76.13
+  port: 6001
+  name: "m3-room-dev-01"
+
+  thread_pool_size: 10
+  ready_timeout: 120
+  pingpong_timeout: 60
+  restart_timeout: 3600
+  update_interval: 60
+
+  stage:
+    host: 10.30.76.13
+    port: 6101
+
+  statistics: http://10.30.76.13:8100/monitor/update/kjs/room
+

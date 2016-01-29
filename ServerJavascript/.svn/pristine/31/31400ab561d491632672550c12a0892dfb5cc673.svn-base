@@ -1,0 +1,35 @@
+'use strict'
+
+var winston = require('winston');
+var logger = new (winston.Logger)({
+  transports: [
+    new (winston.transports.Console)({ 
+        level: SETTINGS.LOGGING[0].level,
+        colorize: true,
+        timestamp: true
+    }),
+    new (winston.transports.File)({ 
+        level: SETTINGS.LOGGING[1].level,
+        filename: SETTINGS.LOGGING[1].filename
+    })
+  ],
+  exceptionHandlers: [
+    new (winston.transports.File)({ 
+        filename: SETTINGS.LOGGING[1].filename
+    })
+  ]
+});
+
+module.exports.debug = logger.debug;
+module.exports.verbose = logger.verbose;
+module.exports.info = logger.info;
+module.exports.warn = logger.warn;
+module.exports.error = logger.error;
+
+module.exports.startProfile = function (name) {
+  logger.profile(name);
+};
+
+module.exports.endProfile = function (name) {
+  logger.profile(name);
+};

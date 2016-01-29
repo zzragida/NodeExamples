@@ -1,0 +1,1682 @@
+package m3.common;
+
+
+enum UserStatus
+{
+	USER_STATUS_INIT = 0;			// 최초 계정생성 상태
+	USER_STATUS_NORMAL = 1;		// 정상
+	USER_STATUS_BLOCKED = 2;	// 사용제한
+	USER_STATUS_DROP_OUT = 3;	// 탈퇴
+}
+
+enum DeviceQuality
+{
+	DEVICE_QUALITY_LOW = 1;		// 저화질
+	DEVICE_QUALITY_MID = 2;		// 중화질
+	DEVICE_QUALITY_HIGH = 3;	// 고화질
+}
+
+enum DisconnectStatus
+{
+	DISCONNECT_SUCCESS = 1;		// 정상
+	DISCONNECT_ABUSE = 2;			// 강제종료
+	DISCONNECT_ABNORMAL = 3;	// 비정상종료
+}
+
+enum TutorialStep
+{
+	TUTORIAL_STEP1 = 1;		// 조작튜토리얼 실행
+	TUTORIAL_STEP2 = 2;		// 조작튜토리얼 완료(부활코인 받음)
+	TUTORIAL_STEP3 = 3;		// 스테이지1 시작
+	TUTORIAL_STEP4 = 4;		// 스테이지1 종료
+	TUTORIAL_STEP5 = 5;		// 무기교체
+	TUTORIAL_STEP6 = 6;		// 강화석 받음
+	TUTORIAL_STEP7 = 7;		// 강화 실행
+	QUERY_TUTORIAL = 10;	// 진행상황
+}
+
+enum ItemRank
+{
+  ITEM_RANK_C = 1;		// C랭크 아이템
+  ITEM_RANK_B = 2;		// B랭크 아이템
+  ITEM_RANK_A = 3;		// A랭크 아이템
+  ITEM_RANK_S = 4;		// S랭크 아이템
+  ITEM_RANK_SS = 5;		// SS랭크 아이템
+}
+
+enum ItemType
+{
+  ITEM_ALL = 999;           // 전체 아이템
+  ITEM_WEAPON_SWORD = 1;    // 검사 무기
+  ITEM_WEAPON_BOW = 2;      // 궁사 무기
+  ITEM_WEAPON_FIST = 3;     // 권사 무기
+  ITEM_HELMET = 4;          // 방어구 머리
+  ITEM_SHIRT = 5;           // 방어구 상의
+  ITEM_PANTS = 6;           // 방어구 하의
+  ITEM_GLOVES = 7;          // 방어구 장갑
+  ITEM_BOOTS = 8;           // 방업구 신발
+  ITEM_RING = 9;            // 방어구 반지
+  ITEM_NECKLECE = 10;       // 방어구 목걸이
+  ITEM_MATERIAL = 11;       // 재료
+  ITEM_COSTUME_PART = 12;   // 코스튬 조각
+  ITEM_BLUEPRINT = 13;      // 도면
+}
+
+
+enum JobType
+{
+	JOB_COMMON = 0;	// 공통
+	JOB_SWORD = 1;	// 검사
+	JOB_ARCHER = 2;	// 궁사
+	JOB_SHAMAN = 3;	// 권사
+}
+
+enum LotteryType
+{
+	LOTTERY_COSTUME_PART = 0;			// 의상 조각 뽑기(캐쉬)
+	LOTTERY_BLUEPRINT = 1;				// 도면 뽑기(부적)
+	LOTTERY_WEAPON = 2;						// 무기 뽑기(부적)
+	LOTTERY_ADVANCE_WEAPON = 3;		// 고급 무기 뽑기(캐쉬)
+	LOTTERY_ACCESSORY = 4;				// 장신구 뽑기(부적)
+	LOTTERY_ADVANCE_ACCESSORY = 5;// 고급 장신구 뽑기(캐쉬)
+	LOTTERY_SHIELD = 6;						// 방어구 뽑기(부적)
+	LOTTERY_ADVANCE_SHIELD = 7;		// 고급 방어구 뽑기(캐쉬): 마지막 값을 유지할것
+}
+
+
+enum LotteryCount
+{
+	LOTTERY_COUNT_ONE = 1;			// 1회 뽑기
+	LOTTERY_COUNT_TEN = 10;			// 10회 뽑기
+}
+
+
+enum LotteryGrade
+{
+	LOTTERY_GRADE_NORMAL = 0;				// 노멀
+	LOTTERY_GRADE_UNIQUE = 1;				// 유니크
+	LOTTERY_GRADE_RARE = 2;					// 레어
+	LOTTERY_GRADE_SUPER_RARE = 3;		// 슈퍼레어
+	LOTTERY_GRADE_ULTRA_RARE = 4;		// 울트라레어
+	LOTTERY_GRADE_MIRACLE_RARE = 5;	// 미라클레어
+}
+
+
+enum LotteryEventCategory
+{
+	LOTTERY_EVENT_SPECIAL = 0;		// 특수(도면, 의상)
+	LOTTERY_EVENT_WEAPON = 1;			// 무기
+	LOTTERY_EVENT_ACCESSORY = 2;	// 장신구
+	LOTTERY_EVENT_SHIELD = 3;			// 방어구
+}
+
+
+enum DungeonType
+{
+	DUNGEON_TUTORIAL = 1;		// 튜토리얼
+	DUNGEON_EPIC = 2;				// 스토리
+	DUNGEON_DAILY = 3;			// 일일
+	DUNGEON_SURVIVAL = 4;		// 서바이벌
+	DUNGEON_EVENT = 5;			// 이벤트
+}
+
+
+enum StageType
+{
+	STAGE_TUTORIAL = 1;			// 튜토리얼
+	STAGE_EPIC = 2;					// 스토리
+	STAGE_DAILY = 3;				// 일일
+	STAGE_SURVIVAL = 4;			// 서바이벌
+	STAGE_EVENT = 5;				// 이벤트
+}
+
+
+enum StageDifficulty
+{
+	STAGE_DIFFICULTY_EASY = 0;		// 쉬움
+	STAGE_DIFFICULTY_NORMAL = 1;	// 보통
+	STAGE_DIFFICULTY_HARD = 2;		// 어려움
+
+	MAX_STAGE_DIFFICULTY = 3;
+}
+
+
+enum TreasureType
+{
+	TREASURE_HONBUL = 1;		// 혼불
+	TREASURE_TALISMAN = 2;	// 부적
+	TREASURE_STONE = 3;			// 강화석
+	TREASURE_COIN = 4;			// 부활의 코인
+	TREASURE_ITEM = 5;			// 아이템
+}
+
+
+enum CashShopCategory
+{
+	CASH_SHOP_HONBUL = 1;		// 혼불구매
+	CASH_SHOP_HEART = 2;		// 하트구매
+	CASH_SHOP_COIN = 3;			// 부활코인구매
+	CASH_SHOP_STONE = 4;		// 강화석구매
+	CASH_SHOP_TALISMAN = 5;	// 부적구매
+}
+
+enum EshopType
+{
+	ESHOP_ORIGINAL = 0;	// 기본상점
+	ESHOP_EVENT = 1;		// 이벤트 상점
+}
+
+enum EshopEventType
+{
+	ESHOP_EVENT_NONE = 0;							// 이벤트없음
+	ESHOP_EVENT_FIRST_PURCHASE = 1;		// 첫구매
+	ESHOP_EVENT_PERIOD_PURCHASE = 2;	// 기간이벤트
+}
+
+enum SaleMark
+{
+	SALE_MARK_NONE = 0;				// 없음
+	SALE_MARK_EVENT = 1;			// 이벤트
+	SALE_MARK_RECOMMEND = 2;	// 추천
+}
+
+
+enum OniShopMethod
+{
+	ONI_SHOP_METHOD_BY_CASH = 1;			// 캐쉬구매
+	ONI_SHOP_METHOD_BY_HONBUL = 2;		// 혼불구매
+	ONI_SHOP_METHOD_RESET_SKILL = 3;	// 스킬초기화
+}
+
+enum OniShopCategory
+{
+	ONI_SHOP_WEAPON = 1;			// 무기
+	ONI_SHOP_SHIELD = 2;			// 방어구
+	ONI_SHOP_ACCESSORY = 3;		// 장신구
+	ONI_SHOP_REST = 4;				// 기타
+}
+
+enum OniGoodsType
+{
+	ONI_GOODS_HONBUL_WEAPON = 1;		// 혼불무기
+	ONI_GOODS_HONBUL_SHIELD = 2;		// 혼불방어구
+	ONI_GOODS_HONBUL_ACCESSORY = 3;	// 혼불장신구
+	ONI_GOODS_HONBUL_REST = 4;			// 혼불기타
+	ONI_GOODS_CASH_WEAPON = 5;			// 캐쉬무기
+	ONI_GOODS_CASH_SHIELD = 6;			// 캐쉬방어구
+	ONI_GOODS_CASH_ACCESSORY = 7;		// 캐쉬장신구
+	ONI_GOODS_CASH_REST = 8;				// 캐쉬기타
+}
+
+
+enum AttrType
+{
+  ATTR_HP = 1;      // 체력
+  ATTR_MP = 2;      // 신력
+  ATTR_ATK = 3;     // 공격력
+  ATTR_ATR = 4;     // 최종 공력율(%)
+  ATTR_DEF = 5;     // 방어력
+  ATTR_DFR = 6;     // 최종 방어율(%)
+  ATTR_CTR = 7;     // 크리티컬 확률(%)
+  ATTR_CTD = 8;     // 크리티컬 데미지(%)
+  ATTR_CCM = 9;     // 체인 콤보
+  ATTR_DEX = 10;     // 솜씨
+  ATTR_HPR = 11;     // 체력 회복량
+  ATTR_HPT = 12;     // 체력 회복 시간 (초)
+  ATTR_MPR = 13;    // 신력 회복량
+  ATTR_MPT = 14;    // 신력 회복 시간 (초)
+  ATTR_HB = 15;     // 혼불 획득 증가량(%)
+  ATTR_CTM = 16;    // 기술 쿨타임(초)
+  ATTR_MOV = 17;    // 이동력(%)
+  ATTR_EXP = 18;    // 경험치 보너스(%)
+}
+
+
+enum RankingType
+{
+	RANKING_STORY_EASY = 0;		// 스토리 랭킹(쉬움)
+	RANKING_STORY_NORMAL = 1;	// 스토리 랭킹(보통)
+	RANKING_STORY_HARD = 2;		// 스토리 랭킹(어려움)
+	RANKING_STORY_TOTAL = 3;	// 스토리 랭킹(총합)
+	RANKING_STORY_SWORD = 4;	// 스토리 랭킹(검사)
+	RANKING_STORY_ARCHER = 5;	// 스토리 랭킹(궁사)
+	RANKING_STORY_SHAMAN = 6;	// 스토리 랭킹(권사)
+	RANKING_SURVIVAL = 7;			// 서바이벌 순위
+	RANKING_SURVIVAL_LAST_WEEK = 8;	// 서바이벌 순위(지난주)
+	RANKING_PVP = 9;					// PVP 순위
+	PROFILE = 10;							// 사용자 프로필정보
+}
+
+
+enum CacheType
+{
+  CACHE_ALL = 0;        		// 모든 캐쉬
+  CACHE_ITEM = 1;       		// 아이템
+  CACHE_LEVEL = 2;      		// 레벨
+  CACHE_LOTTERY = 3;    		// 가챠
+  CACHE_SKILL = 4;      		// 스킬
+  CACHE_COSTUME = 5;    		// 의상정보
+  CACHE_DUNGEON = 6;    		// 던전
+  CACHE_SHOP = 7;       		// 상점
+  CACHE_RANKER = 8;     		// 랭커
+  CACHE_TREASURE_BOX = 9; 	// 보물상자
+  CACHE_GIFT_BOX = 10;  		// 선물함
+	CACHE_PROPERTIES = 11;		// 게임설정
+	CACHE_EVENT = 12;					// 이벤트
+	CACHE_EVENT_DUNGEON = 13;	// 이벤트 던전
+	CACHE_DAILYSTAMP = 14;		// 일일보상
+	CACHE_ACHIVEMENT = 15;		// 업적
+	CACHE_MATERIAL_PRICE = 16;// 빠른재료 수집
+	CACHE_COUPON = 17;				// 쿠폰
+  CACHE_SURVIVAL_BUFF = 18; // 서바이벌 모드 버프
+	CACHE_ONI_SHOP = 19;			// 도깨비 상점
+	CACHE_VIP = 20;						// VIP
+
+	CACHE_ROOM_PARTY_BUFF = 101;	// 룸서버 파티버프
+	CACHE_ROOM_PROPERTIES = 102;	// 룸서버 설정
+}
+
+
+enum GiftType
+{
+	GIFT_NONE = 0;							// 선물없음
+	GIFT_CASH = 1;							// 캐쉬
+	GIFT_HEART = 2;							// 하트
+	GIFT_HONBUL = 3;						// 혼불
+	GIFT_STONE = 4;							// 강화석
+	GIFT_COIN = 5;							// 부활의 코인
+	GIFT_TALISMAN = 7;					// 부적
+	GIFT_ITEM = 8;							// 아이템
+	GIFT_TREASURE_WOOD = 11;		// 나무상자
+	GIFT_TREASURE_BRONZE = 12;	// 동상자
+	GIFT_TREASURE_SILVER = 13;	// 은상자
+	GIFT_TREASURE_GOLD = 14;		// 금상자
+	GIFT_COSTUME = 15;					// 의상
+}
+
+
+enum AchivementType
+{
+	ACHIVEMENT_NONE = 0;									// 미정의
+	ACHIVEMENT_REACH_FOREST = 1; 					// 숲의 지역에 도달
+  ACHIVEMENT_REACH_LAKE = 2; 						// 호수의 지역에 도달
+  ACHIVEMENT_REACH_EARTH = 3; 					// 대지의 지역에 도달
+  ACHIVEMENT_REACH_VOLCANO = 4; 				// 화산의 지역에 도달
+  ACHIVEMENT_REACH_MINE = 5; 						// 광물의 지역에 도달
+  ACHIVEMENT_REACH_BIRTH = 6; 					// 탄생의 성소에 도달
+  ACHIVEMENT_REACH_DESTROY = 7; 				// 소명의 봉인에 도달
+  ACHIVEMENT_LOOKIE_GHOST_HUNTER = 8; 	// 초보 타락 영혼 사냥꾼
+  ACHIVEMENT_GHOST_HUNTER = 9; 					// 타락 영혼 사냥꾼 I
+  ACHIVEMENT_GHOST_HUNTER2 = 10; 				// 타락 영혼 사냥꾼 II
+  ACHIVEMENT_GHOST_HUNTER3 = 11; 				// 타락 영혼 사냥꾼 III
+  ACHIVEMENT_EXPERT_GHOST_HUNTER = 12;	// 타락 영혼 사냥꾼 명인 I
+  ACHIVEMENT_EXPERT_GHOST_HUNTER2 = 13; // 타락 영혼 사냥꾼 명인 II
+  ACHIVEMENT_EXPERT_GHOST_HUNTER3 = 14; // 타락 영혼 사냥꾼 명인 III
+  ACHIVEMENT_MASTER_GHOST_HUNTER = 15; 	// 타락 영혼 사냥꾼 달인
+  ACHIVEMENT_SPECIALIST_FOR_BOSS = 16; 	// 보스 배틀 스페셜리스트
+  ACHIVEMENT_DONT_HARD_WORK = 17;				// 무리, 안돼, 절대로
+  ACHIVEMENT_PHOENIX = 18;							// 불새와 같이 싸워라
+  ACHIVEMENT_HEART_CASH = 19;						// 캐쉬의 마음
+  ACHIVEMENT_HARD_WALLET = 20;					// 든들한 지갑
+  ACHIVEMENT_NOT_ENOUGH_STONE = 21;			// 강화석이 모자라다
+  ACHIVEMENT_REINFORCE_MEISTER = 22;		// 강화 마이스터
+  ACHIVEMENT_ITEM_GRINDER = 23;					// 아이템 분쇄기
+  ACHIVEMENT_MY_MISTAKE = 24;						// 아이쿠 손이 미끄러졌네
+  ACHIVEMENT_HAND_OF_MINUS = 25;				// 마이너스의 손
+  ACHIVEMENT_SELF_REPAIR = 26;					// 자가 수리 만랩
+  ACHIVEMENT_ITEM_COLLECTOR = 27;				// 아이템 콜렉터
+  ACHIVEMENT_TALISMAN_DEALER = 28;			// 부적 봉납계의 큰손
+  ACHIVEMENT_LOTTERY_TYCOON = 29;				// 작은 사당의 작지않은 손
+  ACHIVEMENT_C_LEVEL_COLLECTOR = 30;		// 고물 수집가
+  ACHIVEMENT_B_LEVEL_COLLECTOR = 31;		// 장비 수집가
+  ACHIVEMENT_A_LEVEL_COLLECTOR = 32; 		// 희귀 물품 수집가
+  ACHIVEMENT_S_LEVEL_COLLECTOR = 33; 		// 레어 물품 수집가
+  ACHIVEMENT_SS_LEVEL_COLLECTOR = 34;		// 슈퍼 레어 물품 수집가
+  ACHIVEMENT_COSTUME_BUILDER = 35;			// 의상 빌더
+  ACHIVEMENT_COSTUME_MEISTER = 36;			// 의상 마이스터
+  ACHIVEMENT_BLACKSMITH = 37;						// 대장장이
+  ACHIVEMENT_BATTLE_MASTER = 38;				// 배틀 마스터
+  ACHIVEMENT_PARTY_BATTLE_MASTER = 39;	// 파티 배틀 마스터
+  ACHIVEMENT_HEART_GIVER = 40;					// 하트 나누미
+  ACHIVEMENT_SOCIAL_PARTY_MASTER = 41;	// 소셜 파티 마스터
+  ACHIVEMENT_BEST_HOST = 42;						// 나는야 초대왕 I
+  ACHIVEMENT_BEST_HOST2 = 43;						// 나는야 초대왕 II
+  ACHIVEMENT_BEST_HOST3 = 44;						// 나는야 초대왕 III
+  ACHIVEMENT_BEST_HOST4 = 45;						// 나는야 초대왕 IV
+  ACHIVEMENT_TOGETHER = 46;							// 우리는 모두 친구
+  ACHIVEMENT_HARDWORK = 47;							// 피나는 수련의 결과
+  ACHIVEMENT_POTENTIAL_POWER = 48;			// 잠재 영역의 확장
+  ACHIVEMENT_MISSING_SISTER = 49;				// 잃어버린 자매와의 만남
+  ACHIVEMENT_SURVIVAL_10_WAVE = 50;    // 10층 돌파
+  ACHIVEMENT_SURVIVAL_20_WAVE = 51;    // 20층 돌파
+  ACHIVEMENT_SURVIVAL_30_WAVE = 52;    // 30층 돌파
+  ACHIVEMENT_SURVIVAL_40_WAVE = 53;    // 40층 돌파
+  ACHIVEMENT_SURVIVAL_50_WAVE = 54;    // 50층 돌파
+  ACHIVEMENT_SURVIVAL_60_WAVE = 55;    // 60층 돌파
+  ACHIVEMENT_SURVIVAL_70_WAVE = 56;    // 70층 돌파
+  ACHIVEMENT_CHALLENGE_SURVIVAL = 57;   // 수라의 문을 여는 자
+	ACHIVEMENT_FINAL_STAGE = 58;				 // 세상을 구한자
+	ACHIVEMENT_SURVIVAL_80_WAVE = 59;    // 80층 돌파
+}
+
+
+enum RoomSlot
+{
+	ROOM_SLOT_1 = 1;		// 슬롯1
+	ROOM_SLOT_2 = 2;		// 슬롯2
+	ROOM_SLOT_3 = 3;		// 슬롯3
+}
+
+
+enum PlatformType
+{
+	PLATFORM_ANDROID = 1;	// Google Android
+	PLATFORM_IOS = 2;			// Apple iOS
+}
+
+
+enum MarketType
+{
+	MARKET_APPSTORE = 1;	// Apple AppStore
+	MARKET_PLAYSTORE = 2;	// Google Play Store
+	MARKET_TSTORE = 3;		// T Store
+}
+
+
+enum CurrencyType
+{
+	CURRENCY_KRW = 1;		// KRW
+	CURRENCY_USD = 2;		// USD
+}
+
+
+// EventType과 CouponType의 번호는 선물함의 인덱스 번호임
+// 중복되지 않게 사용할 것!
+enum EventType
+{
+	EVENT_GM = 0;					// GM전용 이벤트
+	EVENT_PERIOD = 1;			// 기간제 이벤트
+	EVENT_LOGIN = 2;			// 로그인 이벤트
+	EVENT_RANKING = 3;		// 랭킹 이벤트
+	EVENT_LEVEL_UP = 4;		// 레벨업 이벤트
+	EVENT_RECOMMEND = 5;	// 추천인 이벤트
+	EVENT_DAILYSTAMP = 6;	// 일일보상 이벤트
+	EVENT_ESHOP = 7;			// 캐쉬할인 이벤트
+	EVENT_GAME = 8;				// 게임보상 이벤트
+	EVENT_LOTTERY = 9;		// 뽑기 이벤트
+	EVENT_COSTUME = 10;		// 의상지급 이벤트
+	EVENT_REVIEW = 11;		// 댓글리뷰 이벤트
+	EVENT_VIP = 12;				// VIP보상 이벤트
+}
+
+enum CouponType
+{
+	COUPON_KEYWORD = 8;		// 키워드쿠폰 이벤트
+	COUPON_SERIAL = 9;		// 개별쿠폰 이벤트
+}
+
+
+enum EventRanking
+{
+	EVENT_RANKING_STORY = 1;		// 스토리랭킹 보상이벤트
+	EVENT_RANKING_SURVIVAL = 2;	// 서바이벌랭킹 보상이벤트
+	EVENT_RANKING_PVP = 3;			// PVP랭킹 보상이벤트
+	EVENT_RANKING_FACEBOOK = 4;		// 페이스북랭킹 보상이벤트
+}
+
+enum SurvivalBuffType
+{
+  SURVIVAL_BUFF_SKIP_WAVE = 1;  // 웨이브 스킵
+  SURVIVAL_BUFF_BOOST = 2;      // 능력치 부스트
+}
+
+enum HistoryItemType
+{
+	HISTORY_ITEM_CASH = 1;				// 캐쉬
+	HISTORY_ITEM_HONBUL = 2;			// 혼불
+	HISTORY_ITEM_STONE = 3;				// 강화석
+	HISTORY_ITEM_TALISMAN = 4;		// 부적
+	HISTORY_ITEM_COIN = 5;				// 부활의코인
+	HISTORY_ITEM_SKILL_POINT = 6;	// 스킬포인트
+	HISTORY_ITEM_HEART = 7;				// 하트
+}
+
+enum HistoryCashGet
+{
+	HISTORY_BUY_CASH_FROM_STORE = 1;		// 캐쉬충전
+	HISTORY_GIFT_CASH = 2;							// 선물
+	HISTORY_QUEST_REWARD_CASH = 3;			// 퀘스트보상
+	HISTORY_ACHIVEMENT_REWARD_CASH = 4;	// 업적보상
+	HISTORY_GM_REWARD_CASH = 5;					// 운영자 직접지급
+}
+
+enum HistoryCashSpend
+{
+	HISTORY_REINFORCE_COSTUME_CASH = 1;	// 의상강화
+	HISTORY_CASH_SHOP_CASH = 2;					// 캐쉬샾에서 물품구매
+	HISTORY_BUY_COSTUME_CASH = 3;				// 의상구매
+	HISTORY_RESURRECTION_CASH = 4;			// 부활
+	HISTORY_LOTTERY_CASH = 5;						// 뽑기
+	HISTORY_ADD_INVENTORY_SLOT_CASH = 6;// 인벤토리확장
+	HISTORY_REINFORCE_ITEM_CASH = 7;		// 아이템강화
+	HISTORY_FIX_ITEM_CASH = 8;					// 아이템수리
+	HISTORY_UNLOCK_STAGE_CASH = 10;			// 스테이지 언락
+	HISTORY_RESET_STAGE_COOLTIME_CASH = 11;	// 스테이지 쿨타임리셋
+	HISTORY_EXPAND_SKILL_BUTTON_CASH = 12;	// 스킬버튼 확장
+	HISTORY_SECOND_TREASURE_CASH = 13;			// 2번째 보물상자
+	HISTORY_EXCHANGE_HEART_TO_CASH = 14;		// 멀티게임 하트교환
+	HISTORY_RESET_MATERIAL_COOLTIME_CASH = 15;		// 빠른재료수집 쿨타임리셋
+	HISTORY_GM_DELETE_CASH = 16;						// 운영자 직접삭제
+  HISTORY_ONI_SHOP_CASH = 17;             // 도깨비 상점 구매
+	HISTORY_RESET_SURVIVAL_TRY_CASH = 18;		// 서바이벌 던전 시도 초기화
+	HISTORY_REVIVAL_CASH = 19;							// 체력회복
+}
+
+enum HistoryHonbulGet
+{
+	HISTORY_CASH_SHOP_HONBUL = 1;					// 혼불구매
+	HISTORY_STAGE_REWARD_HONBUL = 2;			// 스테이지 보상
+	HISTORY_DROP_ITEM_HONBUL = 3;					// 아이템 분해
+	HISTORY_TREASURE_BOX_HONBUL = 4;			// 보물상자
+	HISTORY_GIFT_HONBUL = 5;							// 선물
+	HISTORY_QUEST_REWARD_HONBUL = 6;			// 퀘스트보상
+	HISTORY_ACHIVEMENT_REWARD_HONBUL = 7;	// 업적보상
+	HISTORY_GM_REWARD_HONBUL = 8;					// 운영자 직접지급
+}
+
+enum HistoryHonbulSpend
+{
+	HISTORY_MAKE_COSTUME_HONBUL = 1;				// 의상제작
+	HISTORY_REINFORCE_COSTUME_HONBUL = 2;		// 의상강화
+	HISTORY_REINFORCE_ITEM_HONBUL = 3;			// 아이템강화
+	HISTORY_EXPAND_SKILL_BUTTON_HONBUL = 4;	// 스킬버튼확장
+	HISTORY_REINFORCE_SKILL_HONBUL = 5;			// 스킬강화
+	HISTORY_COLLECT_MATERIAL_HONBUL = 6;		// 빠른재료수집
+	HISTORY_GM_DELETE_HONBUL = 7;						// 운영자 직접삭제
+	HISTORY_MAKE_HERO_HONBUL = 8;						// 캐릭터생성	
+	HISTORY_BATTLE_SKIP_HONBUL = 9;					// 빠른전투
+  HISTORY_ONI_SHOP_HONBUL = 10;           // 도깨비 상점 구매
+  HISTORY_RESET_SKILL_HONBUL = 11;        // 스킬 리셋
+	HISTORY_SURVIVAL_BUFF_HONBUL = 12;			// 서바이벌 버프
+}
+
+enum HistoryTalismanGet
+{
+	HISTORY_MAKE_HERO_TALISMAN = 1;			// 캐릭터생성
+	HISTORY_CASH_SHOP_TALISMAN = 2;			// 부적구매
+	HISTORY_TREASURE_BOX_TALISMAN = 3;	// 보물상자
+	HISTORY_GIFT_TALISMAN = 4;					// 선물
+	HISTORY_QUEST_REWARD_TALISMAN = 5;	// 퀘스트보상
+	HISTORY_ACHIVEMENT_REWARD_TALISMAN = 6;	// 업적보상
+	HISTORY_GM_REWARD_TALISMAN = 7;			// 운영자 직접지급
+}
+
+enum HistoryTalismanSpend
+{
+	HISTORY_LOTTERY_TALISMAN = 1;		// 뽑기
+	HISTORY_GM_DELETE_TALISMAN = 2;	// 운영자 직접삭제
+}
+
+enum HistoryCoinGet
+{
+	HISTORY_CASH_SHOP_COIN = 1;			// 코인충전
+	HISTORY_TREASURE_BOX_COIN = 2;	// 보물상자
+	HISTORY_GIFT_COIN = 3;					// 선물
+	HISTORY_TUTORIAL_COIN = 4;			// 튜토리얼보상
+	HISTORY_QUEST_REWARD_COIN = 5;	// 퀘스트보상
+	HISTORY_ACHIVEMENT_REWARD_COIN = 6;	// 업적보상
+	HISTORY_GM_REWARD_COIN = 7;			// 운영자 직접지급
+}
+
+enum HistoryCoinSpend
+{
+	HISTORY_RESURRECTION_COIN = 1;	// 부활
+	HISTORY_GM_DELETE_COIN = 2;			// 운영자 직접삭제
+}
+
+enum HistoryStoneGet
+{
+	HISTORY_CASH_SHOP_STONE = 1;		// 강화석충전
+	HISTORY_DROP_ITEM_STONE = 2;		// 아이템분해
+	HISTORY_TREASURE_BOX_STONE = 3;	// 보물상자
+	HISTORY_GIFT_STONE = 4;					// 선물
+	HISTORY_TUTORIAL_STONE = 5;			// 튜토리얼보상
+	HISTORY_QUEST_REWARD_STONE = 6;	// 퀘스트보상
+	HISTORY_ACHIVEMENT_REWARD_STONE = 7;	// 업적보상
+	HISTORY_GM_REWARD_STONE = 8;		// 운영자 직접지급
+}
+
+enum HistoryStoneSpend
+{
+	HISTORY_REINFORCE_ITEM_STONE = 1;	// 아이템강화
+	HISTORY_GM_DELETE_STONE = 2;			// 운영자 직접삭제
+}
+
+enum HistorySkillPointGet
+{
+	HISTORY_LEVEL_UP_SKILL_POINT = 1;		// 레벨업	
+	HISTORY_GM_REWARD_SKILL_POINT = 2;	// 운영자 직접지급
+}
+
+enum HistorySkillPointSpend
+{
+	HISTORY_REINFORCE_SKILL_SKILL_POINT = 1;	// 스킬강화
+	HISTORY_GM_DELETE_SKILL_POINT = 2;				// 운영자 직접삭제
+}
+
+enum HistoryHeartGet
+{
+	HISTORY_CASH_SHOP_HEART = 1;			// 하트충전
+	HISTORY_INVITE_FRIEND_HEART = 2;	// 친구초대로 획득
+	HISTORY_RECEIVE_HEART = 3;				// 친구로부터 하트 받음
+	HISTORY_SEND_HEART = 4;						// 하트보냄으로 보상받음
+	HISTORY_GIFT_HEART = 5;						// 선물
+	HISTORY_GM_REWARD_HEART = 6;			// 운영자 직접지급
+}
+
+enum HistoryHeartSpend
+{
+	HISTORY_START_GAME_HEART = 1;		// 게임시작
+	HISTORY_GM_DELETE_HEART = 2;		// 운영자 직접삭제
+}
+
+enum HistoryItem
+{
+  HISTORY_ITEM_FROM_TREASURE_BOX = 1; // 게임 클리어 이후 보물상자에서
+  HISTORY_ITEM_STAGE_REWARD = 2; // 게임 클리어 보상으로
+  HISTORY_ITEM_FROM_LOTTERY = 3; // 부적 뽑기에서 뽑음
+  HISTORY_ITEM_FROM_GIFTBOX = 4; // 선물함에서 직접 입수 획득
+  // Unused HISTORY_ITEM_FROM_ACHIVEMENT = 5; // 업적 보상으로 획득
+  HISTORY_ITEM_FROM_ADMIN = 6; // 운영자가 직접 지급
+  HISTORY_ITEM_TREASURE_BOX_IN_GIFTBOX = 7; // 선물상자안의 보물상자
+  HISTORY_ITEM_FROM_ONI_SHOP = 8; // 도깨비 상점에서 구입
+}
+
+
+// ARPG_LT_USER:CATEGORY
+enum HistoryUser
+{
+  HISTORY_USER_ACCESS = 1; 					// 유저의 시스템 접근
+  HISTORY_USER_START_GAME = 2; 			// 게임 시작(하트 소비)
+  HISTORY_USER_END_GAME = 3; 				// 게임 종료
+  HISTORY_USER_FACEBOOK = 4; 					// 페이스북 메시지
+  HISTORY_USER_SHOP = 5; 						// 충전소 캐쉬 구매 이력
+  HISTORY_USER_COUPON = 6; 					// 쿠폰 입력 이력
+  HISTORY_USER_REINFORCE = 7; 			// 강화 이력
+  HISTORY_USER_FIX_ITEM = 8; 				// 수리 이력
+  HISTORY_USER_MAKE_ITEM = 9; 			// 아이템 제작 이력
+  HISTORY_USER_TAKE_CASH = 10; 			// 게임 내 캐쉬 획득 이력
+  HISTORY_USER_SPEND_CASH = 11;			// 캐쉬 사용 이력
+  HISTORY_USER_TAKE_HEART = 12; 		// 친구 메뉴 하트 획득
+  HISTORY_USER_SPEND_HEART = 13; 		// 하트 소비 이력
+  HISTORY_USER_TAKE_HONBUL = 14;		// 혼불 획득 이력
+  HISTORY_USER_SPEND_HONBUL = 15; 	// 혼불 소비 이력
+  HISTORY_USER_TAKE_STONE = 16; 		// 강화석 획득 이력
+	HISTORY_USER_SPEND_STONE = 17;		// 강화석 소비 이력
+  HISTORY_USER_TAKE_TALISMAN = 18; 	// 부적 획득 이력
+  HISTORY_USER_SPEND_TALISMAN = 19; // 부적 소비 이력
+  HISTORY_USER_TAKE_COIN = 20; 			// 부활의 코인 획득 이력
+  HISTORY_USER_SPEND_COIN = 21; 		// 부활의 코인 소비 이력
+  HISTORY_USER_TAKE_ITEM = 22; 			// 아이템 획득 이력
+  HISTORY_USER_SPEND_ITEM = 23; 		// 아이템 소비 이력
+}
+
+
+enum HistoryUserAccess
+{
+  HISTORY_USER_ACCESS_LOGIN = 1; // 로그인
+	// 플랫폼(INT0), IP(STR0)
+  HISTORY_USER_ACCESS_LOGOUT = 2; // 로그아웃
+	// 플랫폼(INT0), IP(STR0)
+  HISTORY_USER_ACCESS_DETACH = 3; // 접속 떨어짐
+	// 플랫폼(INT0), IP(STR0)
+}
+
+
+enum HistoryUserStartGame
+{
+  HISTORY_USER_START_GAME_SINGLE = 1; // 싱글 시작
+  // 스테이지 ID(INT0), 소비 하트(INT1), 스테이지 레벨(INT2)
+  HISTORY_USER_START_GAME_MULTI = 2; // 멀티 시작
+  // 스테이지 ID(INT0), 소비 하트(INT1), 스테이지 레벨(INT2)
+}
+
+
+enum HistoryUserEndGame
+{
+  HISTORY_USER_END_GAME_SINGLE = 1; // 싱글 결과
+  // 스테이지 ID(INT0), 클리어 여부(INT1) - (0:실패, 1:클리어), 스테이지 레벨(INT2)
+  HISTORY_USER_END_GAME_MULTI = 2; // 멀티 결과
+  // 스테이지 ID(INT0), 클리어 여부(INT1) - (0:실패, 1:클리어), 스테이지 레벨(INT2)
+}
+
+enum HistoryUserFacebook
+{
+  HISTORY_USER_FACEBOOK_HEART = 1; // 하트 메시지 발송 성공
+  // 대상 페이스북ID(INT0), 발송 수(하루 누적)(INT1)
+  HISTORY_USER_FACEBOOK_INVITATION = 2; // 초대 메시지 발송 성공
+  // 대상 페이스북ID(INT0), 발송 수(하루 누적)(INT1)
+}
+ 
+enum HistoryUserShop
+{
+  HISTORY_USER_SHOP_EVENT = 1; // 첫구매 이벤트 해당
+  // 제품ID(STR0), 지급 캐쉬(INT0)
+  HISTORY_USER_SHOP_NO_EVENT = 2; // 첫 구매 이벤트 해당 안됨
+  // 제품ID(STR0), 지급 캐쉬(INT0)
+}
+
+enum HistoryUserTakeCash
+{ 
+  HISTORY_USER_TAKE_CASH_TREASURE_BOX = 1; // 스테이지 클리어 보물 상자
+  // 보물상자ID(INT0), 획득수량(INT1)
+  HISTORY_USER_TAKE_CASH_GIFT_BOX = 2; // 선물함에서 입수
+  // 선물ID(INT0), 획득수량(INT1)
+  // HISTORY_USER_TAKE_CASH_GIFT_TREASURE_BOX = 3; // 선물함 보물상자에서 입수
+  // 선물ID(INT0), 획득수량(INT1), 보물상자(INT2)
+  HISTORY_USER_TAKE_CASH_ACHIVEMENT = 4; // 업적에 입수
+  // 업적ID(INT0), 획득수량(INT1), 레벨(INT2)
+  HISTORY_USER_TAKE_CASH_ADMIN = 5; // 운영자가 직접 입력 - 관리툴에서 제작
+  // 운영자ID(STR0), 획득수량(INT0)
+}
+
+enum HistoryUserSpendCash
+{
+  HISTORY_USER_SPEND_CASH_RESURRECTION = 1; // 인게임 부활
+  // n회째 부활(INT0), 사용금액(INT1), 스테이지 ID(INT2), 스테이지 레벨(INT3)
+  HISTORY_USER_SPEND_CASH_INVENTORY = 2; // 인벤토리 확장
+  // n개 확장(INT0), 사용금액(INT1)
+  HISTORY_USER_SPEND_CASH_SKILL_BUTTON = 3; // 스킬 버튼 확장
+  // 직업(INT0), 사용금액(INT1)
+  HISTORY_USER_SPEND_CASH_OPEN_STAGE = 4; // 클리어 안한 스테이지 오픈
+  // 스테이지ID(INT0), 사용금액(INT1)
+  HISTORY_USER_SPEND_CASH_STAGE_COOLTIME = 5; // 스테이지 쿨타임 리셋
+  // 스테이지ID(INT0), 사용금액(INT1)
+  HISTORY_USER_SPEND_CASH_RESET_COLLECT_TIME = 6; // 빠른 수집 캐쉬 리셋
+  // 사용금액(INT1)
+  HISTORY_USER_SPEND_CASH_FIX_ITEM = 7; // 아이템 수리
+  // 수리한 아이템ID(INT0), 사용금액(INT1)
+  HISTORY_USER_SPEND_CASH_ADMIN = 8; // 운영자가 직접 조작 - 관리툴에서 제작
+  // 운영자ID(STR0), 사용금액(INT0)
+  HISTORY_USER_SPEND_CASH_GACHA = 9; // 작은 사당 뽑기(가챠)
+  // 뽑기종류(INT0), 사용금액(INT1), 뽑기횟수(INT2), 캐릭터ID(INT3)
+  HISTORY_USER_SPEND_CASH_REINFORCE_COSTUME = 10; // 의상 강화
+  // 의상ID(INT0), 금액(INT1), 이전레벨(INT2), 이후 레벨(INT3)
+	HISTORY_USER_SPEND_CASH_ONI_SHOP = 11;		// 도깨비 상점
+	// 아이템ID(INT0), 구매금액(INT1), 할인률(INT2), 캐릭터ID(INT3)
+  HISTORY_USER_SPEND_CASH_RESET_SURVIVAL_TRY = 12;	// 서바이벌 던전 시도
+  // 금액(INT0)
+	HISTORY_USER_SPEND_CASH_REVIVAL = 13;	// 체력회복
+	// 금액(INT0)
+}
+
+enum HistoryUserTakeHeart
+{
+  HISTORY_USER_TAKE_HEART_RECEIVE = 1;  // 받기
+  // 대상(INT0), 획득 하트(INT1)
+  HISTORY_USER_TAKE_HEART_SEND = 2; // 보내기
+  // 대상(INT0), 획득 하트(INT1)
+  HISTORY_USER_TAKE_HEART_INVITE = 3; // 친구 초대
+  // 대상(INT0), 획득 하트(INT1)
+  HISTORY_USER_TAKE_HEART_ADMIN = 4; // 운영자가 직접 지급 - 관리툴에서 제작
+  // 운영자ID(STR0), 획득금액(INT0)
+  HISTORY_USER_TAKE_HEART_MARKET = 5; // 충전소에서 구입
+  // 소모 캐쉬(INT0), 획득하트(INT1), 남은캐쉬(INT2)
+}
+
+enum HistoryUserSpendHeart
+{
+  HISTORY_USER_SPEND_HEART_ADMIN = 1; // 운영자가 직접 조작 - 관리툴에서 삭제
+  // 운영자ID(STR0), 소비금액(INT0)
+}
+
+enum HistoryUserFixItem
+{
+  HISTORY_USER_FIX_ITEM_SUCCESS = 1; // 수리 성공
+  // 수리한 아이템ID(INT0), 사용금액(INT1), 이전 강화레벨(INT2), 이후 강화 레벨(INT3)
+  HISTORY_USER_FIX_ITEM_ADMIN_SUCCESS = 2; // 운영자 수리 성공 - 관리툴에서 제작
+  // 운영자ID(STR0),수리한 아이템ID(INT0), 이전 강화레벨(INT2), 이후 강화 레벨(INT3)
+}
+ 
+enum HistoryUserTakeHonbul
+{
+  HISTORY_USER_TAKE_HONBUL_CLEAR_STAGE = 1; // 스테이지 클리어
+  // 스테이지ID(INT0), 획득금액(INT1)
+  HISTORY_USER_TAKE_HONBUL_TREASURE_BOX = 2; // 스테이지 클리어 보물상자
+  // 보물상자ID(INT0), 획득금액(INT1)
+  HISTORY_USER_TAKE_HONBUL_GIFT_BOX = 3; // 선물함에서 입수
+  // 선물상자ID(INT0), 획득금액(INT1)
+  // HISTORY_USER_TAKE_HONBUL_GIFT_TREASURE_BOX = 4; // 선물함보물상자에서 입수
+  // 선물상자ID(INT0), 획득금액(INT1), 보물상자ID(INT2)
+  HISTORY_USER_TAKE_HONBUL_ACHIVEMENT = 5; // 업적에서 입수
+  // 업적ID(INT0), 획득금액(INT1), 레벨(INT2)
+  HISTORY_USER_TAKE_HONBUL_ADMIN = 6; // 운영자가 직접 지급 - 관리툴에서 제작
+  // 운영자ID(STR0), 획득금액(INT0)
+  HISTORY_USER_TAKE_HONBUL_MARKET = 7; // 충전소에서 구입
+  // 소모 캐쉬(INT0), 획득혼불(INT1), 남은캐쉬(INT2)
+  HISTORY_USER_TAKE_HONBUL_DROP_ITEM = 8; // 인벤토리에서 분해
+  // 아이템ID(INT0), 획득금액(INT1)
+}
+ 
+enum HistoryUserSpendHonbul
+{
+  HISTORY_USER_SPEND_HONBUL_COLLECT_ITEM = 1; // 빠른 수집
+  // 빠른 수집한 아이템ID(INT0), 금액(INT1)
+  HISTORY_USER_SPEND_HONBUL_MAKE_COSTUME = 2;  //  의상 제작
+  // 의상ID(INT0), 금액(INT1)
+  HISTORY_USER_SPEND_HONBUL_REINFORCE_COSTUME = 3; // 의상 강화
+  // 의상ID(INT0), 금액(INT1), 이전레벨(INT2), 이후 레벨(INT3)
+  HISTORY_USER_SPEND_HONBUL_SKILL_BUTTON = 4; // 스킬 버튼 확장
+  // 직업(INT0), 금액(INT1)
+  HISTORY_USER_SPEND_HONBUL_REINFORCE_SKILL = 5; // 스킬 강화
+  // 스킬ID(INT0), 금액(INT1), 이전레벨(INT2), 이후 레벨(INT3)
+  HISTORY_USER_SPEND_HONBUL_UNLOCK_HERO = 6; // 캐릭터 구입
+  // 직업(INT0), 금액(INT1)
+	HISTORY_USER_SPEND_HONBUL_ADMIN = 7;	// 운영자가 직접 삭제
+	// 운영자ID(STR0), 금액(INT0)
+	HISTORY_USER_SPEND_HONBUL_BATTLE_SKIP = 8;	// 빠른전투
+	// 스테이지ID(INT0), 난이도(INT1), 금액(INT2)
+	HISTORY_USER_SPEND_HONBUL_ONI_SHOP = 9;			// 도깨비 상점
+	// 아이템ID(INT0), 구매금액(INT1), 할인률(INT2), 캐릭터ID(INT3)
+	HISTORY_USER_SPEND_HONBUL_RESET_SKILL = 10;	// 스킬초기화
+	// 구매금액(INT0), 할인률(INT1), 캐릭터ID(INT2)
+  HISTORY_USER_SPEND_HONBUL_SURVIVAL_BUFF = 11; // 서바이벌 버프 구매
+  // 버프ID(INT0), 금액(INT1), 캐릭터ID(INT2)
+}
+ 
+enum HistoryUserTakeStone
+{
+  // HISTORY_USER_TAKE_STONE_CLEAR_STAGE = 1; // 스테이지 클리어
+  // 스테이지ID(INT0), 획득금액(INT1)
+  HISTORY_USER_TAKE_STONE_TREASURE_BOX = 2; // 스테이지 클리어 보물상자
+  // 보물상자ID(INT0), 획득금액(INT1)
+  HISTORY_USER_TAKE_STONE_GIFT_BOX = 3; // 선물함에서 입수
+  // 선물상자ID(INT0), 획득금액(INT1)
+  HISTORY_USER_TAKE_STONE_GIFT_TREASURE_BOX = 4; // 선물함 보물상자에서 입수
+  // 선물상자ID(INT0), 획득금액(INT1), 보물상자ID(INT2)
+  HISTORY_USER_TAKE_STONE_ACHIVEMENT = 5; // 업적에서 입수
+  // 업적ID(INT0), 획득금액(INT1)
+  HISTORY_USER_TAKE_STONE_ADMIN = 6; // 관리툴에서 추가
+  // 운영자ID(STR0), 획득금액(INT0)
+  HISTORY_USER_TAKE_STONE_MARKET = 7; // 충전소에서 구입
+  // 소모 캐쉬(INT0), 획득강화석(INT1), 남은캐쉬(INT2)
+  HISTORY_USER_TAKE_STONE_DROP_ITEM = 8; // 인벤토리에서 분해
+  // 아이템ID(INT0), 획득금액(INT1)
+  HISTORY_USER_TAKE_STONE_TUTORIAL = 9; // 튜토리얼에서 획득
+  // 획득금액(INT1)
+}
+
+enum HistoryUserSpendStone
+{
+  HISTORY_USER_SPEND_STONE_ADMIN = 1; // 관리툴에서 제거
+  // 운영자ID(STR0), 소비금액(INT0)
+}
+
+enum HistoryUserReinforce
+{
+  HISTORY_USER_REINFORCE_SAFE_SUCCESS = 1; // 안전강화(성공)
+  // 아이템ID(INT0), 사용금액(INT1), 이전레벨(INT2), 이후레벨(INT3)
+  HISTORY_USER_REINFORCE_SUCCESS = 2; // 일반강화(성공)
+  // 아이템ID(INT0), 사용금액(INT1), 이전레벨(INT2), 이후레벨(INT3)
+  HISTORY_USER_REINFORCE_SAFE_FAIL = 3; // 안전강화(실패)
+  // 아이템ID(INT0), 사용금액(INT1),
+  HISTORY_USER_REINFORCE_FAIL = 4; // 일반강화(실패)
+  // 아이템ID(INT0), 사용금액(INT1),
+  HISTORY_USER_REINFORCE_BROKEN = 5; // 일반 강화(파괴)
+  // 아이템ID(INT0), 사용금액(INT1),
+}
+
+enum HistoryUserTakeTalisman
+{
+  // HISTORY_USER_TAKE_TALISMAN_CLEAR_STAGE = 1; // 스테이지 클리어
+  // 스테이지ID(INT0), 획득금액(INT1)
+  HISTORY_USER_TAKE_TALISMAN_TREASURE_BOX = 2; // 스테이지 클리어 보물상자
+  // 보물상자ID(INT0), 획득금액(INT1)
+  HISTORY_USER_TAKE_TALISMAN_GIFT_BOX = 3; // 선물함에서 입수
+  // 선물상자ID(INT0), 획득금액(INT1)
+  HISTORY_USER_TAKE_TALISMAN_GIFT_TREASURE_BOX = 4; // 선물함 보물상자에서 입수
+  // 선물상자ID(INT0), 획득금액(INT1), 보물상자ID(INT2)
+  HISTORY_USER_TAKE_TALISMAN_ACHIVEMENT = 5; // 업적에서 입수
+  // 업적ID(INT0), 획득금액(INT1)
+  HISTORY_USER_TAKE_TALISMAN_ADMIN = 6; // 운영자 직접 입력 - 관리툴에서 제작
+  // 운영자ID(STR0), 획득금액(INT0)
+  HISTORY_USER_TAKE_TALISMAN_MARKET = 7; // 충전소에서 구입
+  // 소모캐쉬(INT0), 획득부적(INT1), 남은캐쉬(INT2)
+}
+
+enum HistoryUserSpendTalisman
+{ 
+  HISTORY_USER_SPEND_TALISMAN_GACHA = 1; // 작은 사당 뽑기
+  // 뽑기종류(INT0), 사용부적(INT1), 뽑은횟수(INT2), 캐릭터ID(INT3)
+  HISTORY_USER_SPEND_TALISMAN_ADMIN = 2; // 운영자 직접 입력 - 관리툴에서 제작
+  // 운영자ID(STRO), 뽑은 회수(INT0), 사용부적(INT1)
+} 
+
+enum HistoryUserTakeCoin
+{
+  // HISTORY_USER_TAKE_COIN_CLEAR_STAGE = 1; // 스테이지 클리어
+  // 스테이지ID(INT0), 획득금액(INT1)
+  HISTORY_USER_TAKE_COIN_TREASURE_BOX = 2; // 스테이ㅈ 클이러 보물상자
+  // 보물상자ID(INT0), 획득금액(INT1)
+  HISTORY_USER_TAKE_COIN_GIFT_BOX = 3; // 선물함에서 입수
+  // 선물상자ID(INT0), 획득금액(INT1)
+  HISTORY_USER_TAKE_COIN_GIFT_TREASURE_BOX = 4; // 선물함 보물상자에서 입수
+  // 선물상자ID(INT0), 획득금액(INT1), 보물상자ID(INT2)
+  HISTORY_USER_TAKE_COIN_ACHIVEMENT = 5; // 업적에서 입수
+  // 업적ID(INT0), 획득금액(INT1)
+  HISTORY_USER_TAKE_COIN_ADMIN = 6; // 관리자 직접 입력 - 관리툴에서 제작
+  // 운영자ID(STR0), 획득금액(INT0)
+  HISTORY_USER_TAKE_COIN_MARKET = 7; // 충전소에서 구입
+  // 소모캐쉬(INT0), 획득코인(INT1), 남은캐쉬(INT2)
+  HISTORY_USER_TAKE_COIN_TUTORIAL = 8; // 튜토리얼에서 입수
+  // 획득금액(INT1)
+}
+
+enum HistoryUserSpendCoin
+{ 
+  HISTORY_USER_SPEND_COIN_RESURRECTION = 1; // 부활의 코인 사용
+  // 스테이지ID(INT0), 사용 코인(INT1), 레벨(INT2)
+  HISTORY_USER_SPEND_COIN_ADMIN = 2; // 운영자 지급 -  관리툴에서 제작
+  // 운영자ID(STR0), 사용 코인(INT0)
+}
+
+enum HistoryUserCoupon
+{ 
+  HISTORY_USER_COUPON_KEYWORD = 1; // 키워드 쿠폰 입력 성공
+  // 키워드(STR0), 쿠폰ID(INT0)
+  HISTORY_USER_COUPON_SERIAL = 2; // 시리얼 쿠폰 입력 성공
+  // 시리얼(STR0), 쿠폰ID(INT0)
+  HISTORY_USER_COUPON_FAIL = 3; // 쿠폰 입력 실패(지급 실패)
+  // 실패 입력(STR0)
+}
+
+enum HistoryUserTakeItem
+{ 
+  HISTORY_USER_TAKE_ITEM_CLEAR_STAGE = 1; // 스테이지 클리어
+  // 스테이지ID(INT0), 획득개수(INT1), 아이템ID(INT2), 스테이지 레벨(INT3)
+  HISTORY_USER_TAKE_ITEM_TREASURE_BOX = 2; // 스테이지 클리어 보물상자
+  // 보물상자ID(INT0), 획득개수(INT1), 아이템ID(INT2)
+  HISTORY_USER_TAKE_ITEM_CASH_GACHA = 3; // 작은 사당 뽑기(캐쉬)
+  // 아이템ID(INT0), 캐릭터ID(INT1)
+  HISTORY_USER_TAKE_ITEM_TALISMAN_GACHA = 4; // 작은 사당 뽑기(부적)
+  // 아이템ID(INT0), 캐릭터ID(INT1)
+  HISTORY_USER_TAKE_ITEM_GIFT_BOX = 5; // 선물함
+  // 선물상자ID(INT0), 획득개수(INT1), 아이템ID(INT2)
+  HISTORY_USER_TAKE_ITEM_GIFT_TREASURE_BOX = 6; // 선물함
+  // 선물상자ID(INT0), 획득개수(INT1), 아이템ID(INT2), 선물함ID(INT3)
+  HISTORY_USER_TAKE_ITEM_ADMIN = 7; // 운영자 직접 지급 - 관리툴에서 제작
+  // 운영자ID(STR0), 아이템ID(INT0)
+}
+
+enum HistoryUserSpendItem
+{
+  HISTORY_USER_SPEND_ITEM_MATERIAL = 1; // 장비 아이템 제작 재료 소비
+  // 소비한 아이템ID(INT0), 개수(INT1), 도면ID(INT2) 
+  HISTORY_USER_SPEND_ITEM_ADMIN = 2; // 운영자 직접 삭제 - 관리툴에서 제작
+  // 운영자ID(STR0), 삭제한 아이템ID(INT0)
+}
+
+enum HistoryUserMakeItem
+{ 
+  HISTORY_USER_MAKE_ITEM_MAKE = 1; // 장비 아이템 제작
+  // 아이템ID(INT0)
+}
+
+
+
+
+message Attributes
+{
+  required int64 hp = 1;   // 체력
+  required int64 mp = 2;   // 신력
+  required int64 atk = 3;  // 공격력
+  required double atr = 4;  // 최종 공격률
+  required int64 def = 5;  // 방어력
+  required double dfr = 6;  // 최종 방어율
+  required double ctr = 7;  // 크리티컬 확률
+  required double ctd = 8;  // 크리티컬 데미지
+  required int64 ccm = 9;  // 체인 콤보
+  required int64 dex = 10;  // 솜씨
+  required int64 hpr = 11;  // 체력 회복량
+  required double hpt = 12;  // 최력 회복 시간
+  required int64 mpr = 13;  // 신력 회복량
+  required double mpt = 14;  // 신력 회복 시간
+  required double hb = 15;   // 혼불 보너스
+  required double ctm = 16;  // 기술 쿨타임
+  required double mov = 17;  // 이동력
+  required double exp = 18;  // 경험치 보너스
+}
+
+
+
+message Hero
+{
+  message Equip
+  {
+    required int32 type = 1; 	// 장비 종류
+    required int32 level = 2; // 장비 랭크
+    required int32 overcome = 3; // 한계돌파
+  }
+
+  message Skill
+  {
+    required int32 type = 1; 				// 스킬 타입
+    required int32 level = 2; 			// 스킬 레벨
+  }
+
+  required int32 job = 1;           // 직업
+  required int32 level = 2;         // 레벨
+  required int64 curr_exp = 3;           // 경험치
+  required int64 next_exp = 4;      // 다음 레벨까지의 경험치
+  required int64 playing_time = 5;  // 총 플레이 시간(ms)
+
+  optional Equip weapon = 6;        // 무기
+  optional Equip helmet = 7;        // 투구
+  optional Equip shirt = 8;         // 상의
+  optional Equip pants = 9;         // 하의
+  optional Equip gloves = 10;        // 장갑
+  optional Equip boots = 11;        // 부츠
+  optional Equip ring = 12;         // 반지
+  optional Equip necklece = 13;     // 목걸이
+
+  repeated Skill skills = 14;        // 습득한 스킬들
+
+  optional int32 costume_id = 15;    // 선택한 코스튬이 있을때
+
+  optional int32 button_a = 16; // 버튼 A 에 할당된 기술
+  optional int32 button_b = 17; // 버튼 B 에 할당된 기술
+  optional int32 button_c = 18; // 버튼 C 에 할당된 기술
+  optional bool expand_skill_button = 19; // 버튼 확장 여부
+
+  required int32 epic_progress = 20; // 에픽 진행률
+  required int32 skill_rate = 21; // 스킬 습득률
+  required int64 skill_point = 22; // 스킬 포인트
+
+  required Attributes attributes = 23; // 파라미터
+
+	required int32 unlock_stage_count = 24;	// 하루중 스테이지를 잠금해제 할수 있는 횟수
+}
+
+
+
+message Inventory
+{
+  message Equip
+  {
+    required int32 level = 1;     // 장비 레벨
+    required bool limited = 2;    // 장착 제한에 걸려있는지 여부
+    optional bool broken = 3;     // 파괴된 아이템인지 여부
+    required int32 overcome = 4;  // 한계돌파 수준
+  }
+
+  message Item
+  {
+    required int32 count = 1;     // 개수
+  }
+
+  message Entry
+  {
+    required int64 item_id = 1;
+    required int32 type = 2;      // 아이템 종류
+    optional Equip equip = 3;
+    optional Item item = 4;
+  }
+
+  required int32 limit = 1;     // 인벤토리 제한 개수
+  required int64 honbul = 2;		// 혼불
+  required int64 cash = 3;			// 캐쉬
+  repeated Entry entries = 4;		// 실제 들어있는 아이템(인벤토리 제한 개수보다 더 들어있을 수 있음)
+  /* optional int32 fever = 5;  // 가차 피버 정보, 피버와 같이 요청시에만 처리 */
+}
+
+
+
+message GameInfo
+{
+  required int64 honbul = 1;
+  required int64 cash = 2;
+  required int64 talisman = 3; 				// 부적
+  required int64 stone = 4; 					// 강화석
+  required int64 coin = 5; 						// 강화석
+	required int64 heart = 6;
+  required int32 inventory_size = 7; 	// 인벤토리 슬롯 크기
+  optional string nickname = 8;
+  optional Hero selected = 9;
+  required bool searchable = 11; 			// 이름 검색 가능 여부
+
+  optional int32 ranking = 12; 				// 게임에서의 랭킹
+  optional bool terminate_abnormally = 14; // 비정상 종료
+
+	required int32 vip_level = 15;			// VIP 레벨
+
+	optional Badges badges = 18;				// 뱃지정보
+	optional Dungeons dungeons = 19;		// 던전정보
+
+  required bool no_facebook_message = 22; // 페이스북 메시지 수신 여부
+  required bool no_facebook_profile = 23; // 페이스북 프로필 표시 여부
+	required bool review = 24;					 // 댓글리뷰 보상여부
+}
+
+
+message Properties
+{
+  required int32 honbul_for_expand_skill_button = 1;
+  required int32 cash_for_expand_skill_button = 2;
+
+  required int32 reset_cash_for_material_cooltime = 5;
+  required int32 collect_material_multiplier = 6;
+  required int32 max_reset_material_cooltime = 7;
+
+  required int32 cash_for_resurrection = 10;
+  required int32 coin_for_resurrection = 11;
+  required int32 needs_resurrection_by_cash = 13;
+  required int32 needs_resurrection_by_coin = 14;
+
+  required int32 hero_level_for_multiplay = 15;
+	required int32 level_for_new_archer = 16;
+	required int32 honbul_for_new_hero = 17;
+	required int32 cash_for_inventory_slot = 18;
+
+	required int32 max_hero_level = 20;
+	required int32 send_heart_amount = 21;
+	required int32 reward_of_send_heart = 22;
+	required int32 max_friend_count = 23;
+  required int32 reward_of_facebook_invitation = 24;
+
+	required int32 battle_skip_star1 = 30;
+	required int32 battle_skip_star2 = 31;
+	required int32 battle_skip_star3 = 32;
+	required int32 battle_skip_star4 = 33;
+	required int32 battle_skip_star5 = 34;
+	required int32 honbul_for_battle_skip = 35;
+	required int32 battle_skip_exp = 36;
+	required int32 battle_skip_probability = 37;
+
+	required int32 discount_for_oni_shop_honbul = 40;
+	required int32 discount_for_oni_shop_cash = 41;
+	required int32 discount_for_reset_skill = 42;
+
+	required double survival_exp_factor = 50;
+	required double survival_honbul_factor = 51;
+	required int32 survival_max_resurrection = 52;
+	required int32 survival_ingame_heal = 53;
+	required int32 survival_refill_price = 54;
+
+	required bool promotion_onoff = 60;
+	required bool coupon_onoff = 61;
+	required bool cafe_onoff = 62;
+	required bool guest_login_onoff = 63;
+
+	required string community_url = 70;
+
+	required int32 closing_dungeon_timeout = 90;
+	required int32 select_stage_timeout = 91;
+}
+
+
+message Badges
+{
+	required int32 gift_count = 1;				// 선물함에 들어있는 선물의 개수
+	required int32 blueprint = 2;					// 보유한 도면의 개수
+ 	required int32 costume_event = 3; 		// 만들수 있는 의상 + 강화할 수 있는 의상 
+ 	required int32 hearts_to_receive = 4;	// 친구가 보낸 하트 수
+ 	required int32 ask_friendships = 5; 	// 친구 등록 요청한 수
+	required int32 achivement = 6;				// 100% 완료된 업적 수
+}
+
+
+message GameEvent
+{
+	required int32 exp = 1;							// 경험치 n배
+	required int32 honbul = 2;					// 혼불 n배
+	required int32 material = 3;				// 재료보상 n배
+	required int32 start_timestamp = 4;	// 이벤트 시작시간(Unix Timestamp)
+	required int32 end_timestamp = 5;		// 이벤트 종료시간(Unix Timestamp)
+}
+
+
+message Dungeons
+{
+	message Daily
+	{
+		required int32 dungeon_id = 1;
+		optional GameEvent event = 2;
+	}
+
+	message Survival
+	{
+		required int32 dungeon_id = 1;
+		optional GameEvent event = 2;
+	}
+
+	message Event
+	{
+		required int32 dungeon_id = 1;
+		optional GameEvent event = 2;
+	}
+
+	message Story
+	{
+		required int32 epic_progress = 1;	// 스토리 진행율
+  	optional int32 last_epic_stage_id = 2;  // 마지막 에픽던전 스테이지 아이디
+  	optional int32 last_epic_stage_difficulty = 3;  // 마지막 에픽던전 스테이지 난이도
+		optional GameEvent event = 4;
+	}
+
+	optional Story story = 1;				// 스토리 던전
+	optional Survival survival = 2;	// 서바이벌 던전
+	optional Daily daily = 3;				// 일일던전
+	optional Event event = 4;				// 이벤트 던전
+}
+ 
+
+message Player
+{
+  message Skill 
+  {
+    required int32 type = 1; 	// 스킬 종류
+    required int32 level = 2; // 스킬 레벨
+  }
+
+  message Equip
+  {
+    required int32 item_no = 1;	// 장비 번호
+    required int32 level = 2; 	// 장비 레벨
+  }
+
+	optional int64 user_id = 1;			// 사용자 아이디
+  optional int64 player_id = 2; 	// 대기방에 입장하면 발급받는 아이디
+  optional int32 slot = 3; 				// 플레이어가 있는 슬롯 정보
+
+  required string nickname = 4;
+
+  required int32 costume_id = 5; 	// 플레이할 코스튬
+
+  required int32 level = 6; 			// 캐릭터의 레벨
+  required int64 curr_exp = 7;   	// 캐릭터의 경험치
+  required int64 next_exp = 8; 		// 다음 레벨이 되기 위한 경험치
+
+  required int32 job = 10; 				// 캐릭터의 직업
+
+  required int64 honbul = 11;   	// 혼불
+  required int64 cash = 12;     	// 캐쉬
+  required int64 coin = 13;     	// 부활 코인
+
+  optional Equip weapon = 14;     // 무기
+  optional Equip helmet = 15;     // 투구
+  optional Equip shirt = 16;      // 상의
+  optional Equip pants = 17;      // 하의
+  optional Equip gloves = 18;     // 장갑
+  optional Equip boots = 19;      // 부츠
+  optional Equip ring = 20;       // 반지
+  optional Equip necklece = 21;   // 목걸이
+
+  repeated Skill skills = 22;
+
+  optional int32 button_a = 23; // 버튼 A 스킬
+  optional int32 button_b = 24; // 버튼 B 스킬
+  optional int32 button_c = 25; // 버튼 C 스킬
+
+  optional bool master = 26 [default = false]; // 방장 여부
+
+  optional bool ready = 27 [default = false]; // 게임방에서 대기가 완료됬는지 여부
+
+  required Attributes attributes = 28; // 파라미터
+}
+
+
+
+message Room
+{
+  required int32 room_id = 1;
+  optional int64 my_player_id = 4; 	// 내 플레이어 아이디
+  required bool private_room = 5; 	// 비공개방 여부
+  optional bool master = 6; 				// 방의 방장인지 여부
+  repeated Player players = 8; 			// 플레이어 정보
+  required int32 battle_count = 9;  // 전투 회수
+}
+
+
+
+message Invite
+{
+  required int64 user_id = 1; 		// 초청받은 유저
+  required string host_name = 2; 	// 초청한 사람 이름
+  required int32 host_job = 3; 		// 초청한 사람 직업
+  required int32 host_level = 4; 	// 초청한 사람 레벨
+  required int64 room_id = 5; 		// 들어갈 방 번호
+  required string room_ip = 6; 		// 방 서버의 아이피
+  required int32 room_port = 7; 	// 방 서버의 포트
+  required int64 player_id = 10; 	// 게임에 참여할 아이디
+}
+
+
+message InviteResult
+{
+  required bool ok = 1; 						// 전송 완료
+  required bool offline = 2; 				// 오프라인 상태
+  required bool cannot_invite = 3; 	// 초청 불가 상태
+}
+
+
+message RankingDetail
+{
+	required string nickname = 1;			// 닉네임
+  required int32 job = 2;						// 직업
+  required int32 level = 3;					// 레벨
+  required int32 costume_id = 4;		// 코스츔 아이디
+	optional int64 score = 5;					// 점수
+	optional int32 wave = 6;					// 도달웨이브(서바이벌)
+	optional int64 play_time = 7;			// 플레이시간(서바이벌)
+}
+
+
+message Ranker
+{
+  required int64 user_id = 1;     		// 사용자 아이디
+  required string nickname = 2;   		// 닉네임
+  repeated common.Hero heroes = 3;    // 히어로 정보
+}
+
+
+message Resurrection
+{
+  optional int64 coin = 1;  // 부활하고 남은 코인
+  optional int64 cash = 2;  // 부활하고 남은 캐시
+	required int32 needs_resurrection_by_cash = 3;	// 다음부활시에 필요한 캐시
+	required int32 needs_resurrection_by_coin = 4;	// 다음부할시에 필요한 코인
+}
+
+message LevelUp
+{
+  required int64 initial_exp = 1; 	// 게임 시작시에 주어진 경험치
+  required int32 initial_level = 2; // 게임 시작시에 주어진 레벨
+  required int64 curr_exp = 3; 			// 현재 경험치
+}
+
+message Wave
+{
+	required int32 wave = 1;          // 웨이브 횟수
+	required int32 honbul = 2;        // 획득혼불
+	required int32 exp = 3;           // 획득경험치
+	required int32 attack_score = 4;  // 공격스코어
+	required int32 damage_score = 5;  // 데미지스코어
+	required int32 combo_count = 6;   // 콤보수
+	required int32 max_combo = 7;     // 최대콤보수
+	required int32 combo_score = 8;   // 콤보스코어
+	required int32 death_count = 9;   // 죽은횟수
+	required int32 monster_kill_count = 10; // 몬스터 죽인횟수
+	required int32 score = 11;				// 획득점수
+	required int32 play_time = 12;		// 플레이시간
+}
+
+message FinishGame
+{
+	message Failed
+	{
+		required int64 play_time = 1;
+    required int32 exp = 2;
+		required int32 total_score = 3;
+    required int64 honbul = 4;
+	}
+
+	message Cleared
+	{
+		required int32 total_rank = 2;
+    required int64 play_time = 3;
+    required int32 damages = 4;
+    required int32 death_count = 5;
+    required int32 combo_score = 6;
+    required int32 attack_damages = 7;
+    required int32 monster_kill = 8;
+    required int32 total_score = 9;
+    required int64 rank_play_time = 10;
+    required int32 rank_damage = 11;
+    required int32 rank_death_count = 12;
+    required int32 rank_combo = 13;
+    required int32 rank_attack = 14;
+    required int32 rank_monster_kill = 15;
+
+    required int64 exp = 16; // 증가치
+    required int64 honbul = 17; // 증가치
+	}
+
+	/*
+	message Survival	// 웨이브 기준정보
+	{
+		required int64 score = 1; 				// 획득한 점수(증가치)
+    required int32 wave = 2; 					// 통과한 웨이브
+    required int64 play_time = 3;   	// 플레이 시간(증가치)
+    required int64 exp = 4;         	// 획득한 경험치
+    required int64 honbul = 5;      	// 획득한 혼불
+		required int32 attack_damages = 6;// 몬스터에게 입힌 데미지
+		required int32 monster_kill = 7;	// 죽인 몬스터수
+	}
+	*/
+
+	optional Cleared clear = 1;
+	optional Failed fail = 2;
+	//optional Survival survival = 3;
+}
+
+message FinishSurvivalGame
+{
+	required int32 wave = 1;
+	required int64 total_score = 2;
+	required int64 total_play_time = 3;
+	required int64 total_exp = 4;
+	required int64 total_honbul = 5;
+	required int32 total_attack_damages = 6;
+	required int32 total_monster_kill = 7;
+}
+
+
+message Lotterys
+{
+  message Lottery
+  {
+    required LotteryType type = 1;
+    required LotteryCount count = 2;
+    optional int32 cash = 3;
+    optional int32 talisman = 4;
+  }
+  repeated Lottery lotterys = 1;
+}
+
+
+message LotteryEvent
+{
+	required LotteryEventCategory category = 1;
+	required int32 e_id = 2;						// 이벤트 고유번호
+	required int32 start_timestamp = 3;	// 이벤트 시작시간(Unix Timestamp)
+	required int32 end_timestamp = 4;		// 이벤트 종료시간(Unix Timestamp)
+	required string message = 5;				// 이벤트 메세지
+}
+
+
+message Eshop
+{
+	message Goods
+  {
+    required int32 cash = 1;          // 캐쉬
+    required string product_id = 2;   // 상품 종류
+		required int32 pmang_id = 3;			// 피망 아이디
+		required int32 sale_mark = 4;			// 할인마크
+		required string message = 5;			// 판매가격 표시
+  }
+
+	required MarketType market = 1;			// 마켓종류
+	optional EshopEventType event = 2;	// 할인종류(1:첫구매, 2:기간할인)
+	optional int64 cooltime = 3;				// 이벤트 남은 시간(초)
+  repeated Goods goods = 4;
+}
+
+
+message CashShop
+{
+	message Goods
+  {
+		required int32 category = 1;			// 판매 카테고리
+    required int64 cash = 2;      		// 캐쉬가격
+    optional int32 talisman = 3;  		// 부적
+    optional int32 stone = 4;     		// 강화석
+    optional int32 coin = 5;      		// 코인
+    optional int32 heart = 6;     		// 하트
+    optional int64 honbul = 7;    		// 혼불
+		required int32 sale_mark = 8;			// 할인마크
+		required string message = 9;			// 판매가격 표시
+  }
+
+	repeated Goods goods = 1;
+}
+
+
+message EpicDungeons
+{
+  message Dungeon
+  {
+    required int32 dungeon_id = 1; // 던전 아이디
+    required bool lock = 2; // 던전이 잠겨 있는지 여부
+    required bool new_stage = 7; // NEW 를 표시해야 하는 조건
+    required bool going_stage = 8; // ING 를 표시해야 하는 조건
+  }
+  repeated Dungeon dungeons = 1;
+};
+
+
+message Stages
+{
+  enum Perfect 
+  {
+    PERFECT_NONE = 0;
+    PERFECT_NO_DEATH = 1;
+    PERFECT_NO_DAMAGE = 2;
+  }
+
+  message Stage
+  {
+    required int32 stage_id = 1; 		// 스테이지 아이디
+    required bool lock = 2; 				// 레벨이 잠겨 있는지 여부
+    optional bool clear = 3; 				// 스테이지 클리어 여부
+
+    // 다음 도전 시간(초) 
+    // (0 쿨타임이 끝남)
+    optional int32 cooltime = 4; 
+    optional int32 remain_cooltime_reset = 5;	// 남아있는 쿨타임 리셋 카운트
+    
+    message Level
+    {
+      required bool clear = 1; 		// 스테이지 클리어했는지 여부
+      optional int32 star = 2; 		// 클리어 했을때 별
+      optional int64 score = 3; 	// 클리어 했을 경우 점수
+      required Perfect perfect = 4 [default = PERFECT_NONE]; // 노데스 클리어 여부
+    }
+
+    optional Level easy = 6; 			// 쉬움 난이도
+    optional Level normal = 7; 		// 보통 난이도(오픈되었을때만 정보 있음)
+    optional Level hard = 8; 			// 어려움 난이도(오픈되었을 때만 정보 있음)
+    required int32 heart = 9;
+  }
+
+  required int32 dungeon_id = 1;		// 던전아이디
+  repeated Stage stages = 2;				// 스테이지 정보
+	optional GameEvent event = 3;			// 게임보상 이벤트
+};
+
+
+message StageInfo
+{
+  message Wave
+  {
+    message Monster
+    {
+      required int32 monster_id = 1; // 몬스터 종류 
+      required int32 level = 2; // 몬스터 레벨 
+      required int32 count = 3; // 몬스터 개체 수
+    }
+
+    required int32 limit_time = 1; // 제한시간(초)
+    required string description = 2; // 설명
+    required string region = 3; // 스폰 위치
+    repeated Monster monsters = 4; // 몬스터
+    optional string scene = 5; // 배경 씬
+		optional bool boss = 6;	// 보스웨이브 여부
+  }
+
+  message Monster
+  {
+    required int32 monster_id = 1; // 종류
+    required int32 level = 2; // 레벨
+    required int64 hp = 3;   // 체력
+    required int64 mp = 4;   // 신력
+    required int64 atk = 5;  // 공격력
+    required int64 def = 6;  // 방어력
+    required int64 exp = 7; // 경험치
+    required double hit_rate = 8;  // 히트 확률
+    required double ctr = 9;  // 크리티컬 확률
+    required double ctd = 10;  // 크리티컬 데미지
+    required int64 honbul = 11;  // 떨어뜨리는 혼불 
+    required double evasion_rate = 12;  // 회피율
+    required double counter_rate = 13;  // 반격율
+    optional int32 evasion_skill = 14;  // 회피기
+    optional int32 counter_skill = 15;  // 반격기
+    required double ai_0 = 16; // AI 파라미터
+    required double ai_1 = 17; // AI 파라미터
+    required double ai_2 = 18; // AI 파라미터
+    required double ai_3 = 19; // AI 파라미터
+    required double ai_4 = 20; // AI 파라미터
+    required double ai_5 = 21; // AI 파라미터
+    required double ai_6 = 22; // AI 파라미터
+    required double ai_7 = 23; // AI 파라미터
+    required double ai_8 = 24; // AI 파라미터
+    required double ai_9 = 25; // AI 파라미터
+    required double ai_10 = 26; // AI 파라미터
+    required int32 item = 27; // 즉시 소모성 아이템
+    required string name = 28; // 이름
+  }
+
+  required int32 max_player = 1; 	// 최대 플레이어 숫자
+	required int32 stage_id = 2;		// 스테이지 아이디
+	required int32 difficulty = 3;	// 스테이지 난이도
+  required string scene = 4; 			// 유니티 씬
+  repeated Wave waves = 5; 				// 웨이브
+  repeated Monster monsters = 6; 	// 몬스터 디테일 정보
+}
+
+
+message Stamp
+{
+  message Gift
+  {
+    required int32 p_id = 1;  // 선물번호
+  }
+	required int32 e_id = 1;		// 이벤트번호
+  required int32 days = 2;    // 일차
+  repeated Gift gifts = 3;    // 선물목록
+}
+
+
+message DailyStamps
+{
+	required int32 year_month = 1;	// 년월
+	repeated Stamp stamps = 2;			// 출석정보
+}
+
+
+message Achivement
+{
+  required AchivementType type = 1;
+  required int32 finish_lv = 2;
+  required int32 repeat = 3;
+  required int32 reward = 4;
+  required string reward_amount = 5;
+}
+
+
+message DailyAchivement
+{
+  required AchivementType type = 1;
+  required int32 required_lv = 2;
+  required int32 repeat = 3;
+  required int32 reward = 4;
+  required string reward_amount = 5;
+}
+
+
+message Intercom
+{
+  enum MessageType
+  {
+    INVITE = 1;
+    CLEAR_CACHE = 2;
+		UPDATE_MONEY = 3;
+		INSERT_GIFT = 4;
+		DELETE_GIFT = 5;
+		INSERT_ITEM = 6;
+		DELETE_ITEM = 7;
+	
+	KICK = 100;
+  }
+
+  message ClearCache
+  {
+    required CacheType type = 1;
+    required int32 action = 2;
+  }
+
+	message UpdateMoney
+	{
+		required int64 user_id = 1;
+		optional int32 cash = 2;
+		optional int32 heart = 3;
+		optional int32 honbul = 4;
+		optional int32 stone = 5;
+		optional int32 talisman = 6;
+		optional int32 coin = 7;
+	}
+
+	message InsertGift
+	{
+		required int64 user_id = 1;
+		required int32 p_id = 2;				// 선물번호
+	}
+
+	message DeleteGift
+	{
+		required int64 user_id = 1;
+		required int32 present_id = 2;	// 선물함의 선물아이디
+	}
+
+	message InsertItem
+	{
+		required int64 user_id = 1;
+		required int32 item_no = 2;		// 아이템번호
+	}
+
+	message DeleteItem
+	{
+		required int64 user_id = 1;
+		required int32 item_id = 2;		// 인벤의 아이템아이디
+	}
+
+	message Kick
+	{
+		required int64 user_id = 1;		// 사용자아이디
+	}
+
+	message Result
+	{
+		required bool ok = 1;
+	}
+
+  message Request
+  {
+    required MessageType type = 1;
+
+    optional Invite invite = 2;
+    optional ClearCache clear_cache = 3;
+		optional UpdateMoney update_money = 4;
+		optional InsertGift insert_gift = 5;
+		optional DeleteGift delete_gift = 6;
+		optional InsertItem insert_item = 7;
+		optional DeleteItem delete_item = 8;
+
+	optional Kick kick = 100;
+  }
+
+  message Response
+  {
+    required MessageType type = 1;
+
+    optional InviteResult invite = 2;
+		//optional Result clear_cache = 3;
+		optional Result update_money = 4;
+		optional Result insert_gift = 5;
+		optional Result delete_gift = 6;
+		optional Result insert_item = 7;
+		optional Result delete_item = 8;
+
+	optional Result kick = 100;
+  }
+}
+

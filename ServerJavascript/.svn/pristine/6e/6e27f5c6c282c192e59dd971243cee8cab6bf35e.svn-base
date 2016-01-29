@@ -1,0 +1,33 @@
+{
+  "name": "ServerJavascript",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "test": "mocha",
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "body-parser": "~1.12.4",
+    "config": "^1.14.0",
+    "cookie-parser": "~1.3.5",
+    "debug": "~2.2.0",
+    "express": "~4.12.4",
+    "hiredis": "^0.4.0",
+    "js-yaml": "^3.3.1",
+    "morgan": "~1.5.3",
+    "mysql": "^2.7.0",
+    "passport": "^0.2.2",
+    "passport-http-bearer": "^1.0.1",
+    "pool-redis": "^0.1.2",
+    "protobufjs": "^4.0.0-b5",
+    "redis": "^0.12.1",
+    "sequelize": "^3.2.0",
+    "serve-favicon": "~2.2.1",
+    "socket.io": "^1.3.5",
+    "winston": "^1.0.0"
+  },
+  "devDependencies": {
+    "mocha": "^2.2.5",
+    "supertest": "^1.0.1"
+  }
+}

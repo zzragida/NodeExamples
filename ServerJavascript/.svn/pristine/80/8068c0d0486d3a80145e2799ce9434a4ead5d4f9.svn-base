@@ -1,0 +1,18 @@
+'use strict';
+
+var logger = require('../logger');
+var router = require('express').Router();
+
+router.get('/', function(req, res, next) {
+  res.send('Hello Express REST API');
+});
+
+router.get('/health', function(req, res) {
+  res.send(new Buffer(JSON.stringify({
+      pid: process.pid
+    , memory: process.memoryUsage()
+    , uptime: process.uptime()
+  })));
+});
+
+module.exports = router;

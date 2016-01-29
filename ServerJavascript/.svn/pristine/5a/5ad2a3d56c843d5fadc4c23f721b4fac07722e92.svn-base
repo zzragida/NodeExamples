@@ -1,0 +1,112 @@
+'use strict'
+
+// protocol
+var ProtoBuf = require('protobufjs');
+global.PROTOCOL = ProtoBuf.loadProtoFile('./protocol/gateway.proto').build();
+global.DATA = ProtoBuf.loadProtoFile('./protocol/data.proto').build();
+
+// settings
+global.SETTINGS = require('./settings').SETTINGS;
+
+// logger
+global.logger = require('./logger');
+
+// errors
+var errors = require('./errors');
+global.NotImplementedError = errors.NotImplementedError;
+
+// properties
+global.PROPERTIES = require('./properties').PROPERTIES;
+
+// cache
+global.CACHE = require('./cache');
+
+// Objects
+global.Users = {};
+
+// express
+var express = require('express')
+  , morgan = require('morgan')
+  , cookieParser = require('cookie-parser')
+  , bodyParser = require('body-parser');
+
+// passport
+var passport = require('passport')
+  , BearerStrategy = require('passport-http-bearer').Strategy;
+
+// routers
+var index = require('./routes/index')
+  , api = require('./routes/api')
+  , users = require('./routes/users')
+  , contents = require('./routes/contents');
+
+// initialize express
+var app = express();
+
+app.use(morgan('dev'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
+
+// initialize passport
+app.use(passport.initialize());
+passport.use(new BearerStrategy(
+  function (token, done) {
+    // TODO: access_token handling
+    logger.info(token);
+
+    process.nextTick(function () {
+      return done(null, {});
+    });
+  }
+));
+
+// bearer authenticate for /api
+app.all('/api', 
+  passport.authenticate('bearer', { session: false }),
+  function (req, res, next) {
+    next();
+  }
+);
+
+// initialize routers
+app.use('/', index);
+app.use('/api', api);
+app.use('/users', users);
+app.use('/contents', contents);
+
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  var err = new Error('Not Found');
+  err.status = 404;
+  next(err);
+});
+
+// error handlers
+
+// development error handler
+// will print stacktrace
+logger.info('running ' + app.get('env'));
+
+if (app.get('env') === 'development') {
+  app.use(function(err, req, res, next) {
+    res.status(err.status || 500);
+    res.send(JSON.stringify({
+      message: err.message,
+      error: err
+    }));
+  });
+}
+
+// production error handler
+// no stacktraces leaked to user
+app.use(function(err, req, res, next) {
+  res.status(err.status || 500);
+  res.send(JSON.stringify({
+    message: err.message,
+    error: {}
+  }));
+});
+
+
+module.exports = app;

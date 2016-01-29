@@ -1,0 +1,766 @@
+'use strict'
+
+var logger = require('../logger');
+var router = require('express').Router()
+  , gateway = protocol.m3.gateway
+  , common = protocol.m3.common
+  , room = protocol.m3.room
+  , handlers = {};
+
+/* ------------------------------------------------------------- */
+
+function makeResponse(request) {
+  var response = new gateway.Response();
+  response.type = request.type;
+  response.sequence = request.sequence + 1;
+  response.checksum = 0;
+  return response;
+}
+
+function error(response, code, reason) {
+  response.error = new gateway.Response.Error({code:code, reason:reason});
+  return response;
+}
+
+function base64Encoding(response) {
+  return response.encode().toBuffer().toString('base64');
+}
+
+/* ------------------------------------------------------------- */
+
+function handleRequest(request) {
+  return new Promise(function (reply, reject) {
+    var handler = handlers[request.type];
+    console.log(request.type, handler);
+    reply(handler(request));
+  });
+}
+
+/* ------------------------------------------------------------- */
+
+// /api request router
+router.post('/', function (req, res, next) {
+  var encodedString = new Buffer(req.body.data, 'base64');
+  var request = gateway.Request.decode(encodedString);
+
+  handleRequest(request).then(function (response) {
+    res.send(base64Encoding(response));
+  }, function (err) {
+    console.log(err);
+  });
+});
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.NONE] = function (request) {
+  var response = makeResponse(request);
+  return response;
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.VERSION] = function (request) {
+  var response = makeResponse(request);
+
+  if (request.version.service != '0.1-test') {
+    return error(response, gateway.ErrorCode.EC_VERSION, '서비스 버전이 맞지 않음');
+  }
+
+  return response;
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.LOGIN] = function (request) {
+  var response = makeResponse(request);
+  response.login = new gateway.Response.Login();
+  response.login.plug_ip = '10.30.76.12';
+  response.login.plug_port = 9000;
+  response.login.passwd = 'password';
+  return response;
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.LOGOUT] = function (request) {
+  throw new NotImplementedError('logout handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.QUIT] = function (request) {
+  throw new NotImplementedError('quit handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.PLUG] = function (request) {
+  throw new NotImplementedError('plug handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.INFO] = function (request) {
+  var response = makeResponse(request);
+  response.info = new common.GameInfo({
+      honbul: 0
+    , cash: 0
+    , talisman: 0
+    , stone: 0
+    , coin: 0
+    , heart: 0
+    , inventory_size: 100
+    , searchable: true
+    , vip_level: 0
+    , no_facebook_message: false
+    , no_facebook_profile: false
+    , review: false
+  });
+  return response;
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.PROPERTIES] = function (request) {
+  throw new NotImplementedError('properties handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.BADGES] = function (request) {
+  throw new NotImplementedError('badges handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.NICKNAME] = function (request) {
+  throw new NotImplementedError('nickname handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.MAKE_HERO] = function (request) {
+  throw new NotImplementedError('makeHero handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.SELECT_HERO] = function (request) {
+  throw new NotImplementedError('selectHero handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.HEROES] = function (request) {
+  throw new NotImplementedError('heroes handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.DUNGEONS] = function (request) {
+  throw new NotImplementedError('dungeons handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.EPIC_DUNGEONS] = function (request) {
+  throw new NotImplementedError('epicDungeons handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.STAGES] = function (request) {
+  throw new NotImplementedError('stages handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.UNLOCK_STAGE] = function (request) {
+  throw new NotImplementedError('unlockStage handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.RESET_STAGE] = function (request) {
+  throw new NotImplementedError('resetStage handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.QUERY_STAGE] = function (request) {
+  throw new NotImplementedError('queryStage handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.HEART] = function (request) {
+  throw new NotImplementedError('heart handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.ESHOP] = function (request) {
+  throw new NotImplementedError('eshop handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.BUY_IN_ESHOP] = function (request) {
+  throw new NotImplementedError('buyInEshop handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.CASH_SHOP] = function (request) {
+  throw new NotImplementedError('cashShop handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.BUY_IN_CASH_SHOP] = function (request) {
+  throw new NotImplementedError('buyInCashShop handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.ONI_SHOP] = function (request) {
+  throw new NotImplemetedError('oniShop handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.BUY_IN_ONI_SHOP] = function (request) {
+  throw new NotImplementedError('buyInOniShop handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.COSTUMES] = function (request) {
+  throw new NotImplementedError('costumes handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.SELECT_COSTUME] = function (request) {
+  throw new NotImplementedError('selectCostume handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.COSTUMES_TO_MAKE] = function (request) {
+  throw new NotImplementedError('costumesToMake handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.MAKE_COSTUME] = function (request) {
+  throw new NotImplementedError('makeCostume handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.BUY_COSTUME] = function (request) {
+  throw new NotImplementedError('buyCostume handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.COSTUMES_TO_REINFORCE] = function (request) {
+  throw new NotImplementedError('costumesToReinforce handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.REINFORCE_COSTUME] = function (request) {
+  throw new NotImplementedError('reinforceCostume handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.INVENTORY] = function (request) {
+  throw new NotImplemetedError('inventory handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.EXPAND_INVENTORY] = function (request) {
+  throw new NotImplementedError('expandInventory handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.DROP_ITEM] = function (request) {
+  throw new NotImplementedError('dropItem handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.PUT_ON] = function (request) {
+  throw new NotImplementedError('putOn handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.TAKE_OFF] = function (request) {
+  throw new NotImplementedError('takeOff handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.REINFORCE_ITEM] = function (request) {
+  throw new NotImplementedError('reinforceItem handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.FIX_ITEM] = function (request) {
+  throw new NotImplementedError('fixItem handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.MAKE_ITEM] = function (request) {
+  throw new NotImplementedError('makeItem handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.LOTTERYS] = function (request) {
+  throw new NotImplementedError('lotterys handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.TAKE_LOTTERY] = function (request) {
+  throw new NotImplementedError('takeLottery handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.ROOM] = function (request) {
+  throw new NotImplementedError('room handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.RESURRECTION] = function (request) {
+  throw new NotImplementedError('resurrection handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.SKILLS] = function (request) {
+  throw new NotImplementedError('skills handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.EXPAND_SKILL_BUTTON] = function (request) {
+  throw new NotImplementedError('expandSkillButton handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.SKILL_BUTTON] = function (request) {
+  throw new NotImplementedError('skillButton handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.REINFORCE_SKILL] = function (request) {
+  throw new NotImplementedError('reinforceSkill handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.SKILL_AUTO_ASSIGN] = function (request) {
+  throw new NotImplementedError('skillAutoAssign handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.RESET_SKILL] = function (request) {
+  throw new NotImplementedError('resetSkill handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.FIND_BUDDY] = function (request) {
+  throw new NotImplementeError('findBuddy handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.BUDDIES] = function (request) {
+  throw new NotImplementedError('buddies handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.ASK_FRIENDSHIPS] = function (request) {
+  throw new NotImplementedError('askFriendships handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.SEND_HEART] = function (request) {
+  throw new NotImplementedError('sendHeart handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.RECEIVE_HEART] = function (request) {
+  throw new NotImplementedError('receiveHeart handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.RECEIVE_HEART_ALL] = function (request) {
+  throw new NotImplementedError('receiveHeartAll handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.ACCEPT_FRIENDSHIP] = function (request) {
+  throw new NotImplementedError('acceptFriendship handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.REJECT_FRIENDSHIP] = function (request) {
+  throw new NotImplementedError('rejectFriendship handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.EXFRIEND] = function (request) {
+  throw new NotImplementedError('exfriend handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.PROPOSE_BUDDY] = function (request) {
+  throw new NotImplementedError('proposeBuddy handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.SEARCHABLE] = function (request) {
+  throw new NotImplementedError('searchable handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.RECOMMEND_FRIENDSHIPS] = function (request) {
+  throw new NotImplementedError('recommendFriendships handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.FRIEND_PROFILE] = function (request) {
+  throw new NotImplementedError('friendProfile handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.BUDDIES_TO_INVITE_GAME] = function (request) {
+  throw new NotImplementedError('buddiesToInviteGame handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.INVITE_BUDDY_TO_PLAY_GAME] = function (request) {
+  throw new NotImplementedError('inviteBuddyToPlayGame handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.BE_INVITED_TO_PLAY_GAME] = function (request) {
+  throw new NotImplementedError('beInvitedToPlayGame handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.ACCEPT_GAME_INVITATION] = function (request) {
+  throw new NotImplementedError('acceptGameInvitation handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.DECLINE_GAME_INVITATION] = function (request) {
+  throw new NotImplementedError('declineGameInvitation handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.CANCEL_GAME_INVITATION] = function (request) {
+  throw new NotImplementedError('cancelGameInvitation handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.CHANGE_PUBLIC_ROOM] = function (request) {
+  throw new NotImplementedError('changePublicRoom handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.START_GAME] = function (request) {
+  throw new NotImplementedError('startGame handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.FINISH_GAME] = function (request) {
+  throw new NotImplementedError('finishGame handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.SECOND_TREASURE] = function (request) {
+  throw new NotImplementedError('secondTreasure handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.START_SURVIVAL_GAME] = function (request) {
+  throw new NotImplementedError('startSurvivalGame handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.FINISH_SURVIVAL_GAME] = function (request) {
+  throw new NotImplementedError('finishSurvivalGame handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.BATTLE_SKIP] = function (request) {
+  throw new NotImplementedError('battleSkip handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.RANKING] = function (request) {
+  throw new NotImplementedError('ranking handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.RANKER] = function (request) {
+  throw new NotImplementedError('ranker handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.DROP_OUT] = function (request) {
+  throw new NotImplementedError('dropOut handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.CONFIRM_TO_DROP_OUT] = function (request) {
+  throw new NotImplementedError('confirmToDropOut handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.GIFTS] = function (request) {
+  throw new NotImplementedError('gifts handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.TAKE_GIFT] = function (request) {
+  throw new NotImplementedError('takeGift handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.TUTORIAL] = function (request) {
+  throw new NotImplementedError('tutorial handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.LEVEL_UP] = function (request) {
+  throw new NotImplementedError('levelUp handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.WAVE] = function (request) {
+  throw new NotImplementedError('wave handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.DAILYSTAMP] = function (request) {
+  throw new NotImplementedError('dailystamp handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.EXCHANGE_HEART] = function (request) {
+  throw new NotImplementedError('exchangeHeart handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.ACHIVEMENT] = function (request) {
+  throw new NotImplementedError('achivement handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.ACHIVEMENT_REWARD] = function (request) {
+  throw new NotImplementedError('achivementReward handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.FACEBOOK_INVITATION] = function (request) {
+  throw new NotImplementedError('facebookInvitation handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.INVITED_FACEBOOK_FRIENDS] = function (request) {
+  throw new NotImplementedError('invitedFacebookFriends handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.COLLECT_MATERIAL] = function (request) {
+  throw new NotImplementedError('collectMaterial handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.MATERIAL_COOLTIME] = function (request) {
+  throw new NotImplementedError('materialCooltime handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.RESET_MATERIAL_COOLTIME] = function (request) {
+  throw new NotImplementedError('resetMaterialCooltime handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.QUERY_PROMOTION] = function (request) {
+  throw new NotImplementedError('queryPromotion handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.PROMOTER] = function (request) {
+  throw new NotImplementedError('promoter handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.PROMOTION_COUNT] = function (request) {
+  throw new NotImplementedError('promotionCount handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.LINK_FACEBOOK_FRIENDS] = function (request) {
+  throw new NotImplementedError('linkFacebookFriends handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.UNLINK_FACEBOOK_FRIENDS] = function (request) {
+  throw new NotImplementedError('unlinkFacebookFriends handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.FACEBOOK_FRIENDS] = function (request) {
+  throw new NotImplementedError('facebookFriends handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.FACEBOOK_OPTIONS] = function (request) {
+  throw new NotImplementedError('facebookOptions handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.QUERY_FACEBOOK_OPTIONS] = function (request) {
+  throw new NotImplementedError('queryFacebookOptions handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.COUPON] = function (request) {
+  throw new NotImplementedError('coupon handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.KEYWORD_COUPON] = function (request) {
+  throw new NotImplementedError('keywordCoupon handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.COUPON_HISTORY] = function (request) {
+  throw new NotImplementedError('couponHistory handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.ACCOUNT_MERGE] = function (request) {
+  throw new NotImplementedError('accontMerge handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.CONFIRM_TO_ACCOUNT_MERGE] = function (request) {
+  throw new NotImplementedError('confirmToAccountMerge handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.VIP] = function (request) {
+  throw new NotImplementedError('vip handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.SURVIVAL_BUFF] = function (request) {
+  throw new NotImplementedError('survivalBuff handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.REFILL_SURVIVAL_CHALLENGE] = function (request) {
+  throw new NotImplementedError('refillSurvivalChallenge handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.REVIVAL] = function (request) {
+  throw new NotImplementedError('revival handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.PUSH] = function (request) {
+  throw new NotImplementedError('push handler');
+};
+
+/* ------------------------------------------------------------- */
+
+handlers[gateway.MessageType.TEST_PARAM] = function (request) {
+  throw new NotImplementedError('testParam handler');
+};
+
+/* ------------------------------------------------------------- */
+
+module.exports = router;
